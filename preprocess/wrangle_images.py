@@ -4,6 +4,7 @@ import json
 import traceback
 import numpy as np
 
+from import_engine import *
 from snapshot import Snapshot
 from wrangler_tf2 import MovieWrangler
 
@@ -14,12 +15,11 @@ if __name__=='__main__':
     try:
 
         #========= Set current directory to this file's ========#
-        path_currfile = pathlib.Path(__file__).parent.resolve()
-        os.chdir( path_currfile )
+        os.chdir( package_dir )
 
 
         #================ Setup wrangled directory =============#
-        path_settings = path_currfile / "settings.json"
+        path_settings = package_dir / "settings.json"
 
         with open( path_settings, "r", encoding="utf-8_sig" ) as f:
             settings = json.load(f)

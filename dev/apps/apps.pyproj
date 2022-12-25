@@ -8,7 +8,7 @@
     </ProjectHome>
     <StartupFile>
     </StartupFile>
-    <SearchPath>..\Crawling\;..\..\engine</SearchPath>
+    <SearchPath>..\Crawling\</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>apps</Name>
@@ -37,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="apps\clientwidget.py" />
+    <Compile Include="apps\import_engine.py" />
     <Compile Include="apps\searcherclient_main.py" />
     <Compile Include="apps\searcherserver_main.py" />
     <Compile Include="apps\searcherstandalone_main.py" />

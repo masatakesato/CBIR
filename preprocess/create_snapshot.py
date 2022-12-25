@@ -1,9 +1,9 @@
 ﻿import os
-import pathlib
 import json
 import traceback
 
-import crawler
+from import_engine import *
+from crawler import FileCrawler
 
 
 
@@ -12,12 +12,11 @@ if __name__=="__main__":
     try:
 
         #========= Set current directory to this file's ========#
-        path_currfile = pathlib.Path(__file__).parent.resolve()
-        os.chdir( path_currfile )
+        os.chdir( package_dir )
 
 
         #=========== Load Crawl config from json ===============#
-        path_settings = path_currfile / "settings.json"
+        path_settings = package_dir / "settings.json"
 
         # https://qiita.com/Yuu94/items/9ffdfcb2c26d6b33792e windowsだとエンコードで引っかかる
         with open( path_settings, "r", encoding="utf-8_sig" ) as f:
@@ -32,7 +31,7 @@ if __name__=="__main__":
 
 
         #========= Crawl directory and gather fileinfo =========#
-        dirCrawler = crawler.FileCrawler( search_paths, types )
+        dirCrawler = FileCrawler( search_paths, types )
         snapshot = dirCrawler.Run()
         snapshot.Info()
 

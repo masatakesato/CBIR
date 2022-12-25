@@ -7,7 +7,7 @@
     <ProjectHome>
     </ProjectHome>
     <StartupFile>preprocess\create_snapshot.py</StartupFile>
-    <SearchPath>..\Crawling\;..\..\engine</SearchPath>
+    <SearchPath>..\Crawling\</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>preprocess</Name>
@@ -25,12 +25,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="preprocess\create_snapshot.py" />
-    <Compile Include="preprocess\extract_imge_features.py" />
+    <Compile Include="preprocess\extract_image_features.py" />
     <Compile Include="preprocess\generate_thumbnails.py" />
+    <Compile Include="preprocess\import_engine.py" />
     <Compile Include="preprocess\wrangle_images.py" />
-    <Compile Include="Preview.py" />
-    <Compile Include="preview_main.py" />
-    <Compile Include="testWrangle_main.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="CondaEnv|CondaEnv|tf250gpu" />

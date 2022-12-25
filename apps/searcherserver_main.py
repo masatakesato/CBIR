@@ -1,13 +1,13 @@
-﻿import oreorepylib.utils.environment
-
-import os
+﻿import os
 import argparse
 import pathlib
 import json
 import traceback
 
-import oreorepylib.network.tcp as tcp
 
+from import_engine import *
+import oreorepylib.utils.environment
+import oreorepylib.network.tcp as tcp
 from searchengine import SearchEngine
 
 
@@ -29,8 +29,8 @@ if __name__ == '__main__':
     try:
 
         #========= Set current directory to this file's ========#
-        path_currfile = pathlib.Path(__file__).parent.resolve()
-        os.chdir( path_currfile )
+        #path_currfile = pathlib.Path(__file__).parent.resolve()
+        os.chdir( package_dir )
 
 
         #========== Load server address from argumens ==========#
@@ -46,13 +46,14 @@ if __name__ == '__main__':
 
 
         #=========== Load index path from settings.json ========#
-        path_settings = path_currfile / "settings.json"
+        path_settings = package_dir / "settings.json"
 
         with open( path_settings, "r", encoding="utf-8_sig" ) as f:
             settings = json.load(f)
         path_index = pathlib.Path( settings["index_path"] )
 
 
+        #=============== Start searchengine server =============#
         searcher = SearcherServer()
         searcher.Init( path_index, "https://tfhub.dev/google/imagenet/inception_v3/feature_vector/5", [None, 299, 299, 3] )
  
