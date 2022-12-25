@@ -8,7 +8,6 @@
     </ProjectHome>
     <StartupFile>
     </StartupFile>
-    <SearchPath>..\Crawling\</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>apps</Name>

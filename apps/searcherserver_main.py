@@ -45,8 +45,8 @@ if __name__ == '__main__':
             quit()
 
 
-        #=========== Load index path from settings.json ========#
-        path_settings = package_dir / "settings.json"
+        #=========== Load index path from config.json ========#
+        path_settings = package_dir / "config.json"
 
         with open( path_settings, "r", encoding="utf-8_sig" ) as f:
             settings = json.load(f)

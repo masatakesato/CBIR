@@ -130,3 +130,6 @@ dmypy.json
 /preprocess/index
 .vs
 *.user
+/dev/preprocess/preprocess
+/dev/apps/apps
+/index

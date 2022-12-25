@@ -1,4 +1,4 @@
-﻿# preview numpy images
+﻿import pathlib
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -21,8 +21,6 @@ def Plt_Preview( path ):
     plt.show()#plt.pause(5)
 
 
-
-
 #import matplotlib.pyplot as plt
 #from matplotlib.animation import ArtistAnimation
 #import numpy as np
@@ -35,3 +33,11 @@ def Plt_Preview( path ):
 #    artists.append(im)
 #anim = ArtistAnimation(fig, artists, interval=1000)
 #plt.show()
+
+
+
+
+if __name__=='__main__':
+
+    npz_path = pathlib.Path( "../data/wrangled/wrangled_000000.npz" )# './test_out.npz' )
+    Plt_Preview( npz_path, '3' )#'arr_0' )
