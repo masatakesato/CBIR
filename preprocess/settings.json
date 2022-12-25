@@ -1,0 +1,5 @@
+﻿{
+  "search_paths": [ "V:/sampleimages", "V:/testVideoDataset" ],
+  "types": [ "mp4", "mov", "avi", "png", "gif" ],
+  "index_path": "./index"
+}
