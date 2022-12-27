@@ -6,8 +6,7 @@
     <ProjectGuid>bb9a1ca0-8dfb-4fc1-b633-401dc871b64d</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>
-    </StartupFile>
+    <StartupFile>apps\searcherstandalone_main.py</StartupFile>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>apps</Name>
@@ -16,6 +15,7 @@
     <CommandLineArguments>--host=localhost --port=5007</CommandLineArguments>
     <EnableNativeCodeDebugging>True</EnableNativeCodeDebugging>
     <InterpreterId>CondaEnv|CondaEnv|tf250gpu</InterpreterId>
+    <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>

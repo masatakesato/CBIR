@@ -13,6 +13,7 @@
     <RootNamespace>testMovie2Numpy</RootNamespace>
     <InterpreterId>Global|ContinuumAnalytics|Anaconda37-64</InterpreterId>
     <TestFramework>unittest</TestFramework>
+    <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -24,8 +25,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="preprocess\create_snapshot.py" />
+    <Compile Include="preprocess\create_thumbnails.py" />
     <Compile Include="preprocess\extract_image_features.py" />
-    <Compile Include="preprocess\generate_thumbnails.py" />
     <Compile Include="preprocess\import_engine.py" />
     <Compile Include="preprocess\wrangle_images.py" />
   </ItemGroup>
