@@ -10,8 +10,8 @@
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>preprocess</Name>
-    <RootNamespace>testMovie2Numpy</RootNamespace>
-    <InterpreterId>Global|ContinuumAnalytics|Anaconda37-64</InterpreterId>
+    <RootNamespace>preprocess</RootNamespace>
+    <InterpreterId>CondaEnv|CondaEnv|tf250gpu</InterpreterId>
     <TestFramework>unittest</TestFramework>
     <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
@@ -32,7 +32,6 @@
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="CondaEnv|CondaEnv|tf250gpu" />
-    <InterpreterReference Include="Global|ContinuumAnalytics|Anaconda37-64" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="preprocess\" />
