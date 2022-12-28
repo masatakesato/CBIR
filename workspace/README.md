@@ -1,15 +1,18 @@
 # CBIR
 
-A Simple visual search application prototyping content-based retrieval apllication.
+Content-based image/video retrieval apllication using pre-trained CNN.
 
-https://user-images.githubusercontent.com/12041845/209619219-ab8e239e-98aa-42d4-a085-6ac181cebc42.mp4
+<p align="center" >
+  <video width="100%" controls src="https://user-images.githubusercontent.com/12041845/209619219-ab8e239e-98aa-42d4-a085-6ac181cebc42.mp4">
+  </video>
+</p>
 
 Images by ["TinySets development team" - "LEGO Minifigures".](https://www.kaggle.com/datasets/ihelon/lego-minifigures-classification) / Adapted.
 Videos by ["Cafi Net" - "waterfall-free_video".](https://japanism.info/photo-rule.html#rule)
 
 ## About
 
-Purpose: Investigating unstructured data retrieval system. Get accustomed to TF2 programming.
+This repository contains experimental implementation of image/video visual search application. The application retrieves images/videos similar to query from database. I used feature vectors extracted from pre-trained CNN( convolutional neural network ) for similarity measurement.
 
 ## Features
 
@@ -51,7 +54,9 @@ Python environment with following configurations is required to run the program.
 
 Setup
 
-![preprocess_flow](https://user-images.githubusercontent.com/12041845/209782968-c0402a44-3240-4cf4-aeb7-bc1a2c50d576.svg)
+<p align="center" >
+  <img width="70%" src="https://user-images.githubusercontent.com/12041845/209782968-c0402a44-3240-4cf4-aeb7-bc1a2c50d576.svg">
+</p>
 
 指定ディレクトリ内をスキャンして、画像/動画ファイルのインデックスを作成する
 　preprocessディレクトリ内、下記順番に
