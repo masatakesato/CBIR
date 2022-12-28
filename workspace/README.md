@@ -3,6 +3,7 @@
 A Simple visual search application prototyping content-based retrieval apllication.
 
 https://user-images.githubusercontent.com/12041845/209619219-ab8e239e-98aa-42d4-a085-6ac181cebc42.mp4
+
 Images by ["TinySets development team" - "LEGO Minifigures".](https://www.kaggle.com/datasets/ihelon/lego-minifigures-classification) / Adapted.
 Videos by ["Cafi Net" - "waterfall-free_video".](https://japanism.info/photo-rule.html#rule)
 
@@ -49,7 +50,10 @@ Python environment with following configurations is required to run the program.
 ## Running application
 
 Setup
-  指定ディレクトリ内をスキャンして、画像/動画ファイルのインデックスを作成する
+
+![preprocess_flow](https://user-images.githubusercontent.com/12041845/209782968-c0402a44-3240-4cf4-aeb7-bc1a2c50d576.svg)
+
+指定ディレクトリ内をスキャンして、画像/動画ファイルのインデックスを作成する
 　preprocessディレクトリ内、下記順番に
 
 - Configuring preprocess
