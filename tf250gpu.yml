@@ -1,0 +1,16 @@
+name: tf250gpu
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - ffmpeg=4.3.1=ha925a31_0
+  - matplotlib=3.6.2=py39hcbf5309_0
+  - msgpack-python=1.0.4=py39h2e07f2f_0
+  - numpy=1.22.4=py39h0948cea_0
+  - pillow=9.3.0=py39hdc2b20a_1
+  - pyqt=5.12.3=py39hb0d2dfa_4
+  - python=3.9.15=h6244533_2
+  - scikit-learn=1.1.2=py39hfd4428b_0
+  - sk-video=1.1.10=pyh24bf2e0_4
+  - tensorflow=2.5.0=gpu_py39h7dc34a2_0
+  - tensorflow-hub=0.12.0=pyhca92ed8_0
