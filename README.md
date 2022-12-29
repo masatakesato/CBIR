@@ -12,13 +12,13 @@ Videos by ["Cafi Net" - "waterfall-free_video".](https://japanism.info/photo-rul
 
 ## About
 
-This repository contains experimental implementation of image/video visual search application. The application retrieves images/videos similar to query from database. I used feature vectors extracted from pre-trained CNN( convolutional neural network ) for similarity measurement.
+This repository contains experimental implementation of image/video visual search application. The application retrieves images/videos similar to query from database. I used feature vectors extracted from pre-trained CNN(<u>C</u>onvolutional <u>N</u>eural <u>N</u>etwork) for similarity measurement.
 
 ## Features
 
 - Image and video similarity search
 
-- Feature extraction using pre-trained CNN
+- Feature extraction using pre-trained [Inception-V3 model](https://tfhub.dev/google/imagenet/inception_v3/feature_vector/5)
 
 - tcp server/client model
 
