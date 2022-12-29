@@ -16,9 +16,9 @@ This repository contains experimental implementation of image/video visual searc
 
 ## Features
 
-- image and video similarity search
+- Image and video similarity search
 
-- feature extraction using pretrained convolutional neural networks
+- Feature extraction using pre-trained CNN
 
 - tcp server/client model
 
@@ -26,7 +26,7 @@ This repository contains experimental implementation of image/video visual searc
 
 ## Requirements
 
-Python environment with following configurations is required to run the program. Please refer to "tf250gpu.yml".
+Python environment with following configurations is required to run the program. Please refer to **<u>tf250gpu.yml</u>**.
 
 - ffmpeg 4.3.1
 
@@ -50,30 +50,41 @@ Python environment with following configurations is required to run the program.
 
 - tensorflow-hub 0.12.0
 
-## Running application
+## Building application
 
-Setup
+Before running visual search application, you need to set up index data. All the required procedures are included in "preprocess" directory. Below figure shows an brief flow of  preprocessing.
 
 <p align="center" >
   <img width="70%" src="https://user-images.githubusercontent.com/12041845/209782968-c0402a44-3240-4cf4-aeb7-bc1a2c50d576.svg">
 </p>
 
-指定ディレクトリ内をスキャンして、画像/動画ファイルのインデックスを作成する
-　preprocessディレクトリ内、下記順番に
+### Path cofiguration
 
-- Configuring preprocess
-  -config.json、
-  　
-- Creating directory snapshot
-  　python create_snapshot.py
-- Data wrangling
-  　python wrangle_images.py
-- Feature extraction
-  　python extract_image_features.py
-- Thumbnail creation
-  　python create_thumbnails.py
+Open "config.json" and edit the following values. Please refer to **<u>preprocess/config.json</u>**.
 
-+++++ Running application +++++
+- search_paths: Directories to be include in retrieval
+
+- types: File extensions to be included in retrieval
+
+- index_path: Directory to output indexing result
+
+
+
+
+### Preprocessing
+
+After finishing config.json setup, you need to execute python scripts in the following order.
+
+1. create_snapshot.py
+2. wrangle_images.py
+3. python extract_image_features.py
+4. python create_thumbnails.py
+
+
+
+
+
+## Running application
 
 - Specifying Index path
 - Run standalone version
