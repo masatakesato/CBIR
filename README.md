@@ -7,7 +7,7 @@ Content-based image/video retrieval apllication using pre-trained CNN.
   </video>
 </p>
 
-Images by ["TinySets development team" - "LEGO Minifigures".](https://www.kaggle.com/datasets/ihelon/lego-minifigures-classification) / Adapted.
+Images by ["TinySets development team" - "LEGO Minifigures".](https://www.kaggle.com/datasets/ihelon/lego-minifigures-classification)
 Videos by ["Cafi Net" - "waterfall-free_video".](https://japanism.info/photo-rule.html#rule)
 
 ## About
