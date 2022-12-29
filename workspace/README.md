@@ -3,7 +3,7 @@
 Content-based image/video retrieval apllication using pre-trained CNN.
 
 <p align="center" >
-  <video width="100%" controls src="https://user-images.githubusercontent.com/12041845/209619219-ab8e239e-98aa-42d4-a085-6ac181cebc42.mp4">
+  <video width="100%" controls src="https://github.com/masatakesato/CBIR/blob/main/media/VisualSearchDemo.mp4?raw=true">
   </video>
 </p>
 
@@ -26,7 +26,7 @@ This repository contains experimental implementation of image/video visual searc
 
 ## Requirements
 
-Python environment with following configurations is required to run the program. Please refer to **<u>tf250gpu.yml</u>**.
+Python environment with following configurations is required to run the program. Please refer to [**tf250gpu.yml**](https://github.com/masatakesato/CBIR/blob/main/tf250gpu.yml).
 
 - ffmpeg 4.3.1
 
@@ -50,17 +50,17 @@ Python environment with following configurations is required to run the program.
 
 - tensorflow-hub 0.12.0
 
-## Building application
+## Setup
 
-Before running visual search application, you need to set up index data. All the required procedures are included in "preprocess" directory. Below figure shows an brief flow of  preprocessing.
+Before running visual search application, you need to set up index data. All the required procedures are included in [**preprocess**](https://github.com/masatakesato/CBIR/tree/main/preprocess) directory. Below figure shows a preprocess flow.
 
 <p align="center" >
-  <img width="70%" src="https://user-images.githubusercontent.com/12041845/209782968-c0402a44-3240-4cf4-aeb7-bc1a2c50d576.svg">
+  <img width="70%" src="https://raw.githubusercontent.com/masatakesato/CBIR/main/media/preprocess_flow.svg">
 </p>
 
 ### Path cofiguration
 
-Open "config.json" and edit the following values. Please refer to **<u>preprocess/config.json</u>**.
+Open "config.json" and edit the following values. Please refer to [**preprocess/config.json**](https://github.com/masatakesato/CBIR/blob/main/preprocess/config.json).
 
 - search_paths: Directories to be include in retrieval
 
@@ -79,13 +79,13 @@ After finishing config.json setup, you need to execute python scripts in the fol
 
 ## Running application
 
-Application scrips are stored in "apps" directory.
+Application scrips are stored in [**apps**](https://github.com/masatakesato/CBIR/tree/main/apps) directory.
 
 ### Path configuration
 
-Open "config.json" and edit the following values. Please refer to **<u>apps/config.json</u>**.
+Open "config.json" and edit the following values. Please refer to [**apps/config.json**](https://github.com/masatakesato/CBIR/blob/main/apps/config.json).
 
-- index_path: Path to the index directory ( created in "Building apllication" step )
+- index_path: Path to the index directory ( created in "Setup" step )
 
 ### Run standalone version
 
