@@ -68,27 +68,35 @@ Open "config.json" and edit the following values. Please refer to **<u>preproces
 
 - index_path: Directory to output indexing result
 
-
-
-
 ### Preprocessing
 
 After finishing config.json setup, you need to execute python scripts in the following order.
 
 1. create_snapshot.py
 2. wrangle_images.py
-3. python extract_image_features.py
-4. python create_thumbnails.py
-
-
-
-
+3. extract_image_features.py
+4. create_thumbnails.py
 
 ## Running application
 
-- Specifying Index path
-- Run standalone version
-- Run server-client version
-  　separately
+Application scrips are stored in "apps" directory.
 
-++++ References ++++
+### Path configuration
+
+Open "config.json" and edit the following values. Please refer to **<u>apps/config.json</u>**.
+
+- index_path: Path to the index directory ( created in "Building apllication" step )
+
+### Run standalone version
+
+Please execute following python script.
+
+- searcherstandalone_main.py
+
+### Run server-client version
+
+Another implementation example using tcp client-server model. The client deals with query through GUI operation. The server runs retrieval process. Please execute following scripts separately.
+
+- searcherserver_main.py
+
+- searcherclient_main.py
