@@ -58,17 +58,19 @@ Before running visual search application, you need to set up index data. All the
   <img width="70%" src="https://raw.githubusercontent.com/masatakesato/CBIR/main/media/preprocess_flow.svg">
 </p>
 
-### Path cofiguration
+### 1. Path cofiguration
 
-Open "config.json" and edit the following values. Please refer to [**preprocess/config.json**](https://github.com/masatakesato/CBIR/blob/main/preprocess/config.json).
+Open "config.json" in "preprocess" directory, and edit following values.
 
-- search_paths: Directories to be include in retrieval
+- **search_paths**: Directories to be include in retrieval
 
-- types: File extensions to be included in retrieval
+- **types**: File extensions to be included in retrieval
 
-- index_path: Directory to output indexing result
+- **index_path**: Directory to output indexing result
 
-### Preprocessing
+These informations are necessary to create index data. Please refer to example [**preprocess/config.json**](https://github.com/masatakesato/CBIR/blob/main/preprocess/config.json).
+
+### 2. Preprocessing
 
 After finishing config.json setup, you need to execute python scripts in the following order.
 
@@ -79,17 +81,19 @@ After finishing config.json setup, you need to execute python scripts in the fol
 
 ## Running application
 
-Application scrips are stored in [**apps**](https://github.com/masatakesato/CBIR/tree/main/apps) directory.
+All application programs are stored in [**apps**](https://github.com/masatakesato/CBIR/tree/main/apps) directory. You can run visual search demo 
 
 ### Path configuration
 
-Open "config.json" and edit the following values. Please refer to [**apps/config.json**](https://github.com/masatakesato/CBIR/blob/main/apps/config.json).
+Open "config.json" in "apps" directory. Then edit the following value.
 
-- index_path: Path to the index directory ( created in "Setup" step )
+- **index_path**: Directory where you have output the index result. ( usually as same value as "index_path" in "preprocess/config.json" )
+
+Please refer [**apps/config.json**](https://github.com/masatakesato/CBIR/blob/main/apps/config.json) as example setup.
 
 ### Run standalone version
 
-Please execute following python script.
+Execute following python script.
 
 - searcherstandalone_main.py
 
