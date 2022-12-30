@@ -58,7 +58,7 @@ Before running visual search application, you need to set up index data. All the
   <img width="70%" src="https://raw.githubusercontent.com/masatakesato/CBIR/main/media/preprocess_flow.svg">
 </p>
 
-### 1. Path cofiguration
+### Path cofiguration
 
 Open "config.json" in "preprocess" directory, and edit following values.
 
@@ -70,7 +70,7 @@ Open "config.json" in "preprocess" directory, and edit following values.
 
 These informations are necessary to create index data. Please refer to example [**preprocess/config.json**](https://github.com/masatakesato/CBIR/blob/main/preprocess/config.json).
 
-### 2. Preprocessing
+### Preprocessing
 
 After finishing config.json setup, you need to execute python scripts in the following order.
 
