@@ -785,11 +785,12 @@ QTabWidget::pane
 
     padding: 0px 0px 0px 0px;
 }
-
+/*
 QTabWidget::pane:focus
 {
     border-top: 2px solid rgb(191,77,0);
 }
+*/
 
 QTabWidget::pane[ TabWidgetFocus = true ]
 {
@@ -816,19 +817,25 @@ QTabBar::tab:hover
     background-color: rgb(60,60,60);
 }
 
-QTabBar::tab:selected
+QTabBar::tab:enabled:selected
 {
     background-color: rgb(72,72,72);
 }
+/*
+QTabBar::tab:enabled:selected:focus
+{
+    background-color: rgb(191,77,0);
+}
+*/
 
-QTabBar::tab:selected:focus
+QTabBar::tab:enabled:selected[ TabWidgetFocus = true ]
 {
     background-color: rgb(191,77,0);
 }
 
-QTabBar::tab:selected[ TabWidgetFocus = true ]
+QTabBar::tab::disabled
 {
-    background-color: rgb(191,77,0);
+    background-color: rgb(42,42,42);
 }
 
 
@@ -874,22 +881,22 @@ QTabBar::close-button:selected:pressed
 {
     background-color: rgb(48,48,48);
 }
-
+/*
 QTabBar::close-button:selected:hover:focus
 {
     background-color: rgb(255,127,39);
 }
-
+*/
 QTabBar::close-button:selected:hover[ TabWidgetFocus = true ]
 {
     background-color: rgb(255,127,39);
 }
-
+/*
 QTabBar::close-button:selected:pressed:focus
 {
     background-color: rgb(125,50,0);
 }
-
+*/
 QTabBar::close-button:selected:pressed[ TabWidgetFocus = true ]
 {
     background-color: rgb(125,50,0);
@@ -949,6 +956,43 @@ QTabBar QToolButton::right-arrow:pressed
     background-color: rgb(32,32,32);
 }
 
+"""
+
+
+
+g_TabPlusButtonStyleSheet = """
+/*====================== Add new tab button settings ========================*/
+QPushButton
+{
+    width: 20px;
+    height: 16px;
+
+    background-color: transparent;
+
+    margin: 0px 0px 0px 0px;
+    border: 0px none;
+    padding: 0px 0px 0px 0px;
+}
+
+QPushButton:enabled
+{
+    image: url(:/resources/images/plus.png);
+}
+
+QPushButton:disabled
+{
+
+}
+
+QPushButton:hover
+{
+    background-color: rgb(60,60,60);
+}
+
+QPushButton:pressed
+{
+    background-color: rgb(32,32,32);
+}
 """
 
 

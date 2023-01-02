@@ -8,7 +8,7 @@ import traceback
 
 
 
-# Dockable's duration
+# Dockable"s duration
 class Duration(Enum):
     Persistent = 0x00 # Dockable remains even if no child tab exists.
     Volatile = 0x01   # Automatically deleted if no child tab exists.
@@ -42,7 +42,7 @@ class Floater( Frame ):
 
 
     def Release( self ):
-        #print( 'Floater::Release()...' )
+        #print( "Floater::Release()..." )
 
         if( self.receivers(self.SelectSignal) ):
             self.SelectSignal.disconnect()
@@ -72,14 +72,14 @@ class Floater( Frame ):
 
     def mousePressEvent( self, event ):
         super(Floater, self).mousePressEvent(event)
-        #print( 'Floater::mousePressEvent()...' )
+        #print( "Floater::mousePressEvent()..." )
         if( self.handleSelected is None ):
             self.SelectSignal.emit( self.__m_ID )
 
 
     
     def mouseMoveEvent( self, event ):
-        print( 'Floater::mouseMoveEvent()...' )
+        print( "Floater::mouseMoveEvent()..." )
         # Avoid docking at the end of widget resize operation
         if( self.handleSelected is None ):
             self.MoveSignal.emit( self.__m_ID, event.globalPos() )
@@ -89,7 +89,7 @@ class Floater( Frame ):
 
 
     def mouseReleaseEvent( self, event ):
-        #print( 'Floater::mouseReleaseEvent()...' )
+        #print( "Floater::mouseReleaseEvent()..." )
         # Avoid docking at the end of widget resize operation
         if( self.handleSelected is None ):
             self.ReleaseSignal.emit( event.globalPos() )
@@ -99,7 +99,7 @@ class Floater( Frame ):
 
 
     def closeEvent( self, event ):
-        #print( 'Floater::closeEvent()...' )
+        #print( "Floater::closeEvent()..." )
         super(Floater, self).closeEvent(event)
         self.CloseSignal.emit( self.__m_ID )
 
@@ -119,6 +119,10 @@ class TabBar( QTabBar ):
     AttachWidgetSignal = pyqtSignal(QPoint)
     DragWidgetSignal = pyqtSignal(QPoint)
 
+    # Special tab index values
+    __INDEX_NONE__ = -1
+    __INDEX_RESET_FOCUS__ = -2 # Used by SetFocusIndex() to detect Floater attachment completion.
+
     # Drag mode
     __DRAG_NONE__ = -1
     __DRAG_TAB__ = 0
@@ -130,9 +134,11 @@ class TabBar( QTabBar ):
     # __DRAG_NONE__ -> __DRAG_TAB__ -> __DRAG_WIDGET__ -> __DRAG_NONE__
 
 
+    # Tab behavior mask bits
     __CLOSABLE_MASK__ = 0x01
-    __DETACDHABLE_MASK__ = 0x02
+    __DETACHABLE_MASK__ = 0x02
     __PIVOT_MASK__ = 0x04
+
 
     @staticmethod
     def SetBit( value, bitmask, on=True ):
@@ -156,23 +162,60 @@ class TabBar( QTabBar ):
         self.setMovable(False)# Disable default tab drag feature.
         self.setAttribute( Qt.WA_NoMousePropagation )# Avoid mouse event propagation to parent widget(TabWidget, OwnerFrame...)
 
-        # Create Hooter tab. Used for mouse intersection.
-        self.insertTab( 0, '        ' )
+        # Create Footer tab. Used for mouse intersection.
+        self.insertTab( 0, "        " )
         self.setTabEnabled( 0, False )
-
-        self.tabButton( 0, QTabBar.RightSide ).hide()
         self.SetTabClosable( 0, False )
         self.SetTabDetachable( 0, False )
 
+        self.tabButton( 0, QTabBar.RightSide ).hide()
 
-        self.__m_FocusIndex = -1
+############### Test implementation. Adding "+" button only to footer ###############
 
+        self.__m_PlusButton = QPushButton()
+        self.__m_PlusButton.setStyleSheet( g_TabPlusButtonStyleSheet )
+        self.setTabButton( 0, QTabBar.LeftSide, self.__m_PlusButton )
+        self.__m_PlusButton.setEnabled( False )
+
+#####################################################################################
+
+        self.__m_FocusIndex = TabBar.__INDEX_NONE__
 
         self.__m_DragMode = TabBar.__DRAG_NONE__
-        self.__m_CurrIndex = -1
+        self.__m_CurrIndex = TabBar.__INDEX_NONE__
         self.__m_PivotRect = None
         self.__m_bInsidePivot  = False
         self.__m_bEnteredPivot = False
+
+
+        # TabBar custom paint params
+        self.__m_Palatte = QPalette()#self.__m_Palatte()
+        self.__m_Palatte.setColor( self.__m_Palatte.Button, QColor(36,36,36) )
+        #self.__m_Palatte.setColor( self.__m_Palatte.Window, QColor(191,77,0) )
+        #self.__m_Palatte.setColor( self.__m_Palatte.Background, QColor(128,128,128) )
+        self.__m_Option = QStyleOptionTab()
+
+
+
+    def ConnectAddTabCallback( self, add_tab_callback: typing.Callable ):
+        try:
+            if( not isinstance( add_tab_callback, typing.Callable ) ):
+                raise ValueError( "add_tab_callback is not Callable." )
+
+            self.__m_PlusButton.clicked.connect( add_tab_callback )
+            
+            self.__m_PlusButton.setEnabled( True )
+
+            return True
+
+        except:
+            traceback.print_exc()
+            return False
+
+
+
+    def __SetTabButtonVisible( self, i: int, visible: bool ):
+        self.tabButton( i, QTabBar.RightSide if i < self.NumActiveTabs() else QTabBar.LeftSide ).setVisible( visible )
 
 
 
@@ -180,17 +223,34 @@ class TabBar( QTabBar ):
         return self.count() - 1
 
 
-
+    # index... -1: floater has been dragged to outside tabbar, -2: dragged floater has been released inside tabbar
     def SetFocusIndex( self, index ):
-        if( self.__m_FocusIndex!=index ):
-            print( 'TabBar::SetFocusIndex()...%s: %d' % ( self.parentWidget().windowTitle(), index ) )
-            self.__m_FocusIndex = index
+
+        if( self.__m_FocusIndex != index ):
+            #print( "TabBar::SetFocusIndex()...%s: %d -> %d" % ( self.parentWidget().windowTitle(), self.__m_FocusIndex, index ) )
+
+            if( index == TabBar.__INDEX_RESET_FOCUS__ ):  # Floater has been docked to tabbar
+                self.__SetTabButtonVisible( self.__m_FocusIndex+1, True )
+                #print("show x button: ", self.__m_FocusIndex+1 )
+            elif( index == TabBar.__INDEX_NONE__ ):# On mouse dragging Floater to outside tabbar
+                self.__SetTabButtonVisible( self.__m_FocusIndex, True )
+                #print("show x button: ", self.__m_FocusIndex )
+            elif( self.__m_FocusIndex == TabBar.__INDEX_NONE__ ):# On mouse dragging Floater from outside tabbar
+                self.__SetTabButtonVisible( index, False )
+                #print("hide x button: ", index )
+            else:# Dragging Floater inside tabbar
+                self.__SetTabButtonVisible( index, False )
+                self.__SetTabButtonVisible( self.__m_FocusIndex,True )
+                #print("hide x button: ", index )
+                #print("show x button: ", self.__m_FocusIndex )
+
+            self.__m_FocusIndex = max(index, -1)
             self.update()
 
 
 
     def SetTabClosable( self, index: int, on: bool ) -> None:
-        #print( 'TabBar::SetTabClosable()...{}: {}'.format( index, on ) )
+        #print( "TabBar::SetTabClosable()...{}: {}".format( index, on ) )
         self.tabButton( index, QTabBar.RightSide ).setEnabled(on)
         self.setTabData( index, self.SetBit( self.tabData(index), TabBar.__CLOSABLE_MASK__, on ) )
 
@@ -203,27 +263,27 @@ class TabBar( QTabBar ):
 
 
     def SetTabDetachable( self, index: int, on: bool ) -> None:
-        #print( 'TabBar::SetTabDetachable()...{}'.format( on ) )
-        self.setTabData( index, self.SetBit( self.tabData(index), TabBar.__DETACDHABLE_MASK__, on ) )
+        #print( "TabBar::SetTabDetachable()...{}".format( on ) )
+        self.setTabData( index, self.SetBit( self.tabData(index), TabBar.__DETACHABLE_MASK__, on ) )
 
 
 
     def IsTabDetachable( self, index: int ) -> bool:
-        #print( 'TabBar::IsTabDetachable()...{}'.format( index ) )
-        return self.Bit( self.tabData(index), TabBar.__DETACDHABLE_MASK__ )
+        #print( "TabBar::IsTabDetachable()...{}".format( index ) )
+        return self.Bit( self.tabData(index), TabBar.__DETACHABLE_MASK__ )
 
 
 
     def tabInserted( self, index ):
         #print( "TabBar::tabInserted(%d)" % index )
         self.setCurrentIndex(index)
-        self.setTabData( index, TabBar.__CLOSABLE_MASK__ | TabBar.__DETACDHABLE_MASK__ )
+        self.setTabData( index, TabBar.__CLOSABLE_MASK__ | TabBar.__DETACHABLE_MASK__ )
         #return super(TabWidget, self).tabInserted(index)
         
 
 
     def tabRemoved( self, index ):
-        #print( 'TabBar::tabRemoved(%d)' % index )
+        #print( "TabBar::tabRemoved(%d)" % index )
         self.setCurrentIndex( max(min(index, self.count()-2), 0) )# clamp current index range to [ 0, NumActiveTabs()-1 ]
         #return super(TabWidget, self).tabRemoved(index)
 
@@ -276,13 +336,13 @@ class TabBar( QTabBar ):
                     self.__m_CurrIndex = index
                     
                 elif( self.__m_PivotRect.contains(pos)==True and self.__m_bEnteredPivot==False ):
-                    #print( 'Entered...' )
+                    #print( "Entered..." )
                     self.__m_bEnteredPivot = True
                     self.moveTab( self.__m_CurrIndex, index )
                     self.__m_CurrIndex = index
 
                 #elif( self.__m_PivotRect.contains(pos)==False and self.__m_bEnteredPivot==True ):
-                    #print( 'Left...' )
+                    #print( "Left..." )
 
             # Mouse dragged detachable tab to outside TabBar area.
             elif( self.IsTabDetachable( self.__m_CurrIndex ) ):
@@ -307,7 +367,7 @@ class TabBar( QTabBar ):
         elif( self.__m_DragMode==TabBar.__DRAG_TAB__ ):
             self.setTabData( self.__m_CurrIndex, self.SetBit( self.tabData(self.__m_CurrIndex), TabBar.__PIVOT_MASK__, False ) )
 
-        self.__m_CurrIndex = -1
+        self.__m_CurrIndex = TabBar.__INDEX_NONE__
         self.__m_DragMode = TabBar.__DRAG_NONE__
 
         return super(TabBar, self).mouseReleaseEvent(event)
@@ -318,26 +378,37 @@ class TabBar( QTabBar ):
 # https://forum.qt.io/topic/92923/qtabbar-paintevent-issue/4
 # https://stackoverflow.com/questions/49464153/giving-a-color-to-single-tab-consumes-too-much-processing-power
     def paintEvent( self, event ):
+        #print( "TabBar::paintEvent()..." )
+
+        #painter = QPainter( self )
+
+        #for i in range( self.count() ):
+        #    self.initStyleOption( self.__m_Option, i )
+
+        #    if( i == self.__m_FocusIndex ):
+        #        self.__m_Option.palette = self.__m_Palatte
+        #        self.style().drawControl( QStyle.CE_TabBarTabShape, self.__m_Option, painter )
+
+        #    else:
+        #        self.style().drawControl( QStyle.CE_TabBarTabShape, self.__m_Option, painter, self )
+        #        self.style().drawControl( QStyle.CE_TabBarTabLabel, self.__m_Option, painter, self )
+
+
         super(TabBar, self).paintEvent(event)
 
-        if( self.__m_FocusIndex!=-1 ):
-            painter = QPainter(self)
-            option = QStyleOptionTab()
-            self.initStyleOption( option, self.__m_FocusIndex )
+        if( self.__m_FocusIndex != TabBar.__INDEX_NONE__ ):
+            painter = QPainter( self )
+            self.initStyleOption( self.__m_Option, self.__m_FocusIndex )
+            self.__m_Option.palette = self.__m_Palatte
+            self.style().drawControl( QStyle.CE_TabBarTabShape, self.__m_Option, painter )
+        
 
-            palette = self.palette()
-            palette.setColor( palette.Button, QColor(36,36,36) )
-            #palette.setColor( palette.Window, QColor(232,232,232) )
-            #palette.setColor( palette.Background, QColor(42,42,42,0) )
-            option.palette = palette
-
-            self.style().drawControl( QStyle.CE_TabBarTabShape, option, painter )
 
 
 
     def Info( self, index ):
-        print( '//============ Tab[{}] ==============//'.format( index ) )
-        print( '  Name: {}\n  IsClosable: {}\n  IsDetachable: {}'.format( self.tabText(index), self.IsTabClosable(index), self.IsTabDetachable(index) )  )
+        print( "//============ Tab[{}] ==============//".format( index ) )
+        print( "  Name: {}\n  IsClosable: {}\n  IsDetachable: {}".format( self.tabText(index), self.IsTabClosable(index), self.IsTabDetachable(index) )  )
 
 
 
@@ -369,7 +440,7 @@ class TabWidget( QTabWidget ):
         self.__m_TabBar = TabBar(self)
         self.setTabBar( self.__m_TabBar )
 
-        self.setWindowTitle( '        ' )
+        self.setWindowTitle( "        " )
         self.setStyleSheet(  g_TabWidgetStyleSheet )
         self.setAttribute( Qt.WA_NoMousePropagation | Qt.WA_StyledBackground )# Avoid mouse event propagation to parent widget(OwnerFrame...)
         self.setFocusPolicy( Qt.StrongFocus )
@@ -382,7 +453,7 @@ class TabWidget( QTabWidget ):
         # True: TabWidget will be destroyed automatically if no active tab exists.
         # False: TabWidget is persistent regardless of active tab existence.
 
-        self.__m_ID = id(self)#kwargs['widget_id'] if 'widget_id' in kwargs else id(self)
+        self.__m_ID = id(self)#kwargs["widget_id"] if "widget_id" in kwargs else id(self)
 
 
 
@@ -552,7 +623,7 @@ class DockableFrame( Frame ):
     def __init__( self, *args, **kwargs ):
         super(DockableFrame, self).__init__(*args, **kwargs)
 
-        self.setWindowTitle( '        ' )
+        self.setWindowTitle( "        " )
         self.Resize( 512, 512 )
         self.setLayout( QVBoxLayout() )
         self.layout().setContentsMargins( 4, 4, 4, 4 )
@@ -570,7 +641,7 @@ class DockableFrame( Frame ):
 
 
     def Clear( self ):
-        #print( 'DockableFrame::Clear()...' )
+        #print( "DockableFrame::Clear()..." )
 
         if( self.IsPersistent() ):
             self.__m_TabWidget.Clear()
@@ -581,7 +652,7 @@ class DockableFrame( Frame ):
 
 
     def Release( self ):
-        #print( 'DockableFrame::Release()...' )
+        #print( "DockableFrame::Release()..." )
 
         self.__m_TabWidget.Release()
 
@@ -622,7 +693,7 @@ class DockableFrame( Frame ):
 
 
     def SetLock( self, on: bool ) -> None:
-        #print( 'DockableFrame::SetLock()...%r' % on )
+        #print( "DockableFrame::SetLock()...%r" % on )
         self.__m_TabWidget.SetLock(on)
 
 
@@ -694,7 +765,7 @@ class DockableFrame( Frame ):
 
 
     def setCurrentIndex( self, index: int ) -> None:
-        #print( 'DockableFrame::setCurrentIndex()... %d' % index )
+        #print( "DockableFrame::setCurrentIndex()... %d" % index )
         return self.__m_TabWidget.setCurrentIndex(index)
 
 
@@ -731,14 +802,14 @@ class DockableFrame( Frame ):
 
     def mousePressEvent( self, event ):
         super(DockableFrame, self).mousePressEvent(event)
-        print( "DockableFrame::mousePressEvent()...%s" % self.windowTitle() )
+        #print( "DockableFrame::mousePressEvent()...%s" % self.windowTitle() )
         if( self.handleSelected is None and self.IsVolatile() ):
             self.__m_TabWidget.SetLock(True) 
 
 
 
     def mouseMoveEvent( self, event ):
-        print( "DockableFrame::mouseMoveEvent()...%s" % self.windowTitle() )
+        #print( "DockableFrame::mouseMoveEvent()...%s" % self.windowTitle() )
         if( self.handleSelected is None and self.IsVolatile() ):# Avoid docking check while resizing widget.
             self.MoveSignal.emit( self.__m_ID, event.globalPos() )
         return super(DockableFrame, self).mouseMoveEvent(event)
@@ -746,7 +817,7 @@ class DockableFrame( Frame ):
 
 
     def mouseReleaseEvent( self, event ):
-        print( "DockableFrame::mouseReleaseEvent()...%s" % self.windowTitle() )
+        #print( "DockableFrame::mouseReleaseEvent()...%s" % self.windowTitle() )
         if( self.handleSelected is None and self.IsVolatile() ):# Avoid docking check while resizing widget.
             self.ReleaseSignal.emit( self.__m_ID, event.globalPos() )
             self.__m_TabWidget.SetLock(False)
@@ -755,7 +826,7 @@ class DockableFrame( Frame ):
 
 
     def changeEvent( self, event ):
-        print( "DockableFrame::changeEvent()..." )
+        #print( "DockableFrame::changeEvent()..." )
         if( event.type()==QEvent.ActivationChange and self.isActiveWindow() ):
             self.RaiseSignal.emit( self.__m_ID )
         return super(DockableFrame, self).changeEvent(event)
@@ -763,7 +834,7 @@ class DockableFrame( Frame ):
 
 
     def closeEvent( self, event ):
-        #print( 'DockableFrame::closeEvent()...' )
+        #print( "DockableFrame::closeEvent()..." )
         self.__m_TabWidget.SetTrash( True )
         super(DockableFrame, self).closeEvent(event)
         self.CleanupSignal.emit( True )
@@ -771,7 +842,7 @@ class DockableFrame( Frame ):
 
 
     def raise_( self ):
-        #print( 'DockableFrame::raise_()...%s' % self.windowTitle() )
+        #print( "DockableFrame::raise_()...%s" % self.windowTitle() )
         self.RaiseSignal.emit( self.__m_ID )
         return super(DockableFrame, self).raise_()
 
@@ -802,16 +873,18 @@ class TabbedMDIManager:
 
         self.__m_CurrFloaterID = None
 
+        self.__m_refDefaultAddTabCallback = None
+
 
 
     def __del__( self ):
-        #print( 'TabbedMDIManager::__del__()...' )
+        #print( "TabbedMDIManager::__del__()..." )
         self.Release()
 
 
 
     def Clear( self ):
-        #print( 'TabbedMDIManager::Clear()...' )
+        #print( "TabbedMDIManager::Clear()..." )
 
         # Clear all dockers
         for dockable in self.__m_Dockables.values():
@@ -823,7 +896,7 @@ class TabbedMDIManager:
 
 
     def Release( self ):
-        #print( 'TabbedMDIManager::Release()...' )
+        #print( "TabbedMDIManager::Release()..." )
 
         # Delete all dockables
         for widget_id in list( self.__m_Dockables.keys() ):
@@ -842,7 +915,27 @@ class TabbedMDIManager:
 
 
 
-    def AddDockable( self, widget_type: type, duration=Duration.Volatile ) -> typing.Any:
+    def EnableDefaultAddTab( self, callback: typing.Callable ) -> bool:
+        try:
+
+            if( not isinstance(callback, typing.Callable) ):
+                raise ValueError( "callback is not Callable." )
+            self.__m_refDefaultAddTabCallback = callback
+            return True
+
+        except:
+            traceback.print_exc()
+            self.__m_refDefaultAddTabCallback = None
+            return False
+
+
+
+    def DisableDefaultAddTab( self ):
+        self.__m_refDefaultAddTabCallback = None
+
+
+
+    def AddDockable( self, widget_type: type, duration: Duration=Duration.Volatile, add_tab_callback: typing.Callable=None ) -> typing.Any:
         try:
             newWidget = widget_type()
             newWidget.SetDuration( duration )
@@ -858,6 +951,10 @@ class TabbedMDIManager:
             newWidget.tabBar().DetachWidgetSignal.connect( lambda index: self.__DetachFloater( newWidget.ID(), index ) )
             newWidget.tabBar().AttachWidgetSignal.connect( self.__AttachFloater )
             newWidget.tabBar().DragWidgetSignal.connect( self.__DragFloater )
+
+            # connect AddTab button function
+            if( add_tab_callback ):            
+                newWidget.tabBar().ConnectAddTabCallback( lambda: self.AddTab( newWidget.ID(), *add_tab_callback() ) )
 
             self.__m_Dockables[ newWidget.ID() ] = newWidget
             self.__m_Order.append( newWidget.ID() )
@@ -1053,7 +1150,7 @@ class TabbedMDIManager:
 
             if( bUpdateTitle ):
                 widget.setWindowTitle( title )
-                print( 'TabbedMDIManager::SetTabTitle()... {}'.format( title ) )
+                print( "TabbedMDIManager::SetTabTitle()... {}".format( title ) )
 
         except:
             traceback.print_exc()
@@ -1103,7 +1200,6 @@ class TabbedMDIManager:
 
     # Sort Dockables in top-most order
     def __UpdateTopMost( self, widget_id ):
-        print( "TabbedMDIManager::__UpdateTopMost()..." )
 
         depth = self.__m_Order.index(widget_id)
         # Reorder OwnerFrames
@@ -1111,11 +1207,11 @@ class TabbedMDIManager:
             self.__m_Order[d] = self.__m_Order[d-1]
         self.__m_Order[0] = widget_id
 
-        # Clear TabBar's Focus Index
+        # Clear TabBar"s Focus Index
         for d in reversed( range(1, len(self.__m_Order) ) ):
             self.__m_Dockables[self.__m_Order[d]].tabBar().SetFocusIndex(-1)
 
-        #print( 'TabbedMDIManager::__UpdateTopMost()...%s' % self.__m_Dockables[ self.__m_Order[0] ].windowTitle() )
+        #print( "TabbedMDIManager::__UpdateTopMost()...%s" % self.__m_Dockables[ self.__m_Order[0] ].windowTitle() )
 
         ## Debug print dockable order
         #for i, widget_id in enumerate(self.__m_Order):
@@ -1126,7 +1222,7 @@ class TabbedMDIManager:
     # Detach content widget from TabWidget
     def __DetachFloater( self, owner_id, index ):
 
-        #print( 'TabbedMDIManager::__DetachFloater()...%d' % index )
+        #print( "TabbedMDIManager::__DetachFloater()...%d" % index )
 
         ownerWidget = self.__m_Dockables[ owner_id ]
 
@@ -1140,7 +1236,7 @@ class TabbedMDIManager:
 
         # transfer content widget to floater
         contentWidget = ownerWidget.widget( index )
-        floater.SetAttribs( { 'TabClosable': ownerWidget.IsTabClosable(index), 'Size': ownerWidget.size() } )
+        floater.SetAttribs( { "TabClosable": ownerWidget.IsTabClosable(index), "Size": ownerWidget.size() } )
         floater.setWindowTitle( contentWidget.windowTitle() )
         floater.layout().addWidget( contentWidget )
         floater.resize( contentWidget.size() )# resize must be after addWidget
@@ -1163,7 +1259,7 @@ class TabbedMDIManager:
 
 
     def __Cleanup( self, destroyContentWidgets=True ):
-        #print( 'TabbedMDIManager::__Cleanup()...' )
+        #print( "TabbedMDIManager::__Cleanup()..." )
         
         # Delete unused dockables
         for widget_id, widget in list( self.__m_Dockables.items() ):
@@ -1186,7 +1282,7 @@ class TabbedMDIManager:
 
 
     def __DeleteDockable( self, widget_id ):
-        #print( 'TabbedMDIManager::__DeleteDockable()...' )
+        #print( "TabbedMDIManager::__DeleteDockable()..." )
         try:
             # Delete dockable
             self.__m_Dockables[ widget_id ].Release()
@@ -1200,7 +1296,7 @@ class TabbedMDIManager:
 
 
     def __DeleteContentWidget( self, widget_id, destroy: bool ) -> None:
-        #print( 'TabbedMDIManager::__DeleteContentWidget()...', widget_id )
+        #print( "TabbedMDIManager::__DeleteContentWidget()...", widget_id )
         try:
             self.__m_ContentWidgets[ widget_id ].setParent(None)
             if( destroy ):
@@ -1214,7 +1310,7 @@ class TabbedMDIManager:
 
 
     def __DeleteFloater( self, widget_id ):
-        #print( 'TabbedMDIManager::__DeleteFloater()...' )
+        #print( "TabbedMDIManager::__DeleteFloater()..." )
         try:
             self.__m_Floaters[ widget_id ].Release()
             self.__m_Floaters[ widget_id ].deleteLater()
@@ -1226,21 +1322,21 @@ class TabbedMDIManager:
 
 
     def __MergeDockables( self ):
-        print( 'TabbedMDIManager::__MergeDockables()...' )
+        print( "TabbedMDIManager::__MergeDockables()..." )
 
         emptyOwnerIDs = [ owner_id for owner_id, widget in self.__m_Dockables.items() if widget.IsTrashed() ]
 
-        # Transfer floater's content widget to dockable.
+        # Transfer floater"s content widget to dockable.
         for floater in self.__m_Floaters.values():
-            ownerWidget = self.__m_Dockables[ emptyOwnerIDs.pop() ] if bool(emptyOwnerIDs) else self.__m_Dockables[ self.AddDockable(DockableFrame, Duration.Volatile) ]
+            ownerWidget = self.__m_Dockables[ emptyOwnerIDs.pop() ] if bool(emptyOwnerIDs) else self.__m_Dockables[ self.AddDockable(DockableFrame, Duration.Volatile, self.__m_refDefaultAddTabCallback) ]
             
             if( floater.layout().count() > 0 ):
 
                 contentWidget = floater.layout().itemAt(0).widget()
 
                 ownerWidget.addTab( contentWidget, contentWidget.windowTitle() )
-                ownerWidget.SetTabClosable( 0, floater.GetAttribs()[ 'TabClosable' ] )
-                ownerWidget.resize( floater.GetAttribs()[ 'Size' ] )
+                ownerWidget.SetTabClosable( 0, floater.GetAttribs()[ "TabClosable" ] )
+                ownerWidget.resize( floater.GetAttribs()[ "Size" ] )
                 ownerWidget.activateWindow()
                 ownerWidget.show()
 
@@ -1264,18 +1360,18 @@ class TabbedMDIManager:
         
         floatingWidgetOpacity = TabbedMDIManager.__c_Opacity[0]
         raiseOwnerIndex = 0
-        tabBarIndex = -1
+        tabBarIndex = TabBar.__INDEX_NONE__
 
-        # Check intersection against 'active' dockable
+        # Check intersection against "active" dockable
         for i, owner_id in enumerate( self.__m_Order ):            
             ownerWidget = self.__m_Dockables[ owner_id ]
             if( not ownerWidget.IsActive() ): continue
             
-            pos =ownerWidget.mapFromGlobal(globalPos) 
+            pos = ownerWidget.mapFromGlobal(globalPos) 
             if( ownerWidget.rect().contains(pos) ):
                 # Update raiseOwnerIndex
                 raiseOwnerIndex = i
-                # Update floater's opacity
+                # Update floater"s opacity
                 tabBar = ownerWidget.tabBar()
                 pos = tabBar.mapFromGlobal(globalPos)
                 floatingWidgetOpacity = TabbedMDIManager.__c_Opacity[ int( tabBar.rect().contains(pos) ) ]
@@ -1298,7 +1394,7 @@ class TabbedMDIManager:
         
         floatingWidgetOpacity = TabbedMDIManager.__c_Opacity[0]
         raiseOwnerIndex = 0
-        tabBarIndex = -1
+        tabBarIndex = TabBar.__INDEX_NONE__
 
         for i, owner_id in enumerate( self.__m_Order ):
 
@@ -1309,7 +1405,7 @@ class TabbedMDIManager:
             if( ownerWidget.rect().contains(pos) ):
                 # Update raiseOwnerIndex
                 raiseOwnerIndex = i
-                # Update floater's opacity
+                # Update floater"s opacity
                 tabBar = ownerWidget.tabBar()
                 pos = tabBar.mapFromGlobal(globalPos)
                 floatingWidgetOpacity = TabbedMDIManager.__c_Opacity[ int( tabBar.rect().contains(pos) ) ]
@@ -1342,16 +1438,16 @@ class TabbedMDIManager:
             tabBar = ownerWidget.tabBar()
             index = tabBar.tabAt( tabBar.mapFromGlobal( globalPos ) )
             
-            if( index != -1 ):
+            if( index != TabBar.__INDEX_NONE__ ):
                 
                 if( floater.layout().count() > 0 ):
                     contentWidget = floater.layout().itemAt(0).widget()
                     ownerWidget.insertTab( index, contentWidget, contentWidget.windowTitle() )
-                    ownerWidget.SetTabClosable( index, attribs[ 'TabClosable' ] )
+                    ownerWidget.SetTabClosable( index, attribs[ "TabClosable" ] )
                     ownerWidget.activateWindow()
                     ownerWidget.setWindowOpacity(1.0)
 
-                tabBar.SetFocusIndex(-1)
+                tabBar.SetFocusIndex( TabBar.__INDEX_RESET_FOCUS__ )# Tell tabbar that Floater attachment is finished by sending -2.
 
                 # Delete floater
                 self.__DeleteFloater( self.__m_CurrFloaterID )
@@ -1378,7 +1474,7 @@ class TabbedMDIManager:
             tabBar = destDockable.tabBar()
             index = tabBar.tabAt( tabBar.mapFromGlobal( globalPos ) )
 
-            if( index != -1 ):
+            if( index != TabBar.__INDEX_NONE__ ):
                 for i in range( numActiveSrcTabs ):
                     # get widget from top
                     contentWidget = srcDockable.widget(0)
@@ -1389,10 +1485,10 @@ class TabbedMDIManager:
                     destDockable.SetTabClosable( index+i, tabClosable )
                     contentWidget.setVisible(True)
 
-                destDockable.setCurrentIndex( index + srcCurrentIndex )# Restore srcDockable's current tab selected.
+                destDockable.setCurrentIndex( index + srcCurrentIndex )# Restore srcDockable"s current tab selected.
                 destDockable.activateWindow()
         
-                tabBar.SetFocusIndex(-1)
+                tabBar.SetFocusIndex( TabBar.__INDEX_RESET_FOCUS__ )# Tell tabbar that Dockable attachment is finished by sending -2.
 
                 # Delete dockable
                 self.__DeleteDockable( widget_id )
@@ -1406,14 +1502,14 @@ class TabbedMDIManager:
 
     # Debug print dockables/contentWidgets status
     def Info( self ):
-        print( '//==================== TabbedMDIManager::Info()... ====================//' )
-        print( '  Dockables:', len(self.__m_Dockables) )
+        print( "//==================== TabbedMDIManager::Info()... ====================//" )
+        print( "  Dockables:", len(self.__m_Dockables) )
         for dockable in self.__m_Dockables.values():
-            print( '    name: \'{}\', type: {}'.format( dockable.windowTitle(), dockable.__class__.__name__ ) )
+            print( "    name: \"{}\", type: {}".format( dockable.windowTitle(), dockable.__class__.__name__ ) )
         print()
-        print( '  ContentWidgets:', len(self.__m_ContentWidgets) )
+        print( "  ContentWidgets:", len(self.__m_ContentWidgets) )
         for content in self.__m_ContentWidgets.values():
-            print( '    name: \'{}\', hasParent: {}, type: {}'.format( content.windowTitle(), bool(content.parentWidget()), content.__class__.__name__ ) )
+            print( "    name: \"{}\", hasParent: {}, type: {}".format( content.windowTitle(), bool(content.parentWidget()), content.__class__.__name__ ) )
 
         print()
 
@@ -1422,9 +1518,9 @@ class TabbedMDIManager:
 
 
 #def onTabFocusChanged( old: QWidget, new: QWidget, propertyName: str ) -> None:
-#    #print( '{} -> {}'.format( old, new ) )
+#    #print( "{} -> {}".format( old, new ) )
 
-#    #print( '/---------------- old -----------------------/')
+#    #print( "/---------------- old -----------------------/")
 #    while( old ):# isinstance(old, QWidget)
 #        #print( old )
 #        if( isinstance( old, QTabWidget ) ):
@@ -1436,7 +1532,7 @@ class TabbedMDIManager:
 #            break
 #        old = old.parentWidget()
 
-#    #print( '/---------------- new -----------------------/')
+#    #print( "/---------------- new -----------------------/")
 #    while( new ):# isinstance(new, QWidget)
 #        #print( new )
 #        if( isinstance( new, QTabWidget ) ):
@@ -1447,4 +1543,4 @@ class TabbedMDIManager:
 #            tabBar.setStyle( tabBar.style() )
 #            break
 #        new = new.parentWidget()       
-#    #print( '' )
+#    #print( "" )

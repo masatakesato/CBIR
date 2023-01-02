@@ -6,7 +6,7 @@
     <ProjectGuid>bb9a1ca0-8dfb-4fc1-b633-401dc871b64d</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>apps\searcherstandalone_main.py</StartupFile>
+    <StartupFile>apps\searcherclient_mdi_main.py</StartupFile>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>apps</Name>
@@ -41,8 +41,10 @@
     <Compile Include="apps\clientwidget.py" />
     <Compile Include="apps\import_engine.py" />
     <Compile Include="apps\searcherclient_main.py" />
+    <Compile Include="apps\searcherclient_mdi_main.py" />
     <Compile Include="apps\searcherserver_main.py" />
     <Compile Include="apps\searcherstandalone_main.py" />
+    <Compile Include="apps\searcherstandalone_mdi_main.py" />
   </ItemGroup>
   <!-- Uncomment the CoreCompile target to enable the Build command in
        Visual Studio and specify your pre- and post-build commands in
