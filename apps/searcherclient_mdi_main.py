@@ -5,7 +5,7 @@ from import_engine import *
 import oreorepylib.network.tcp as tcp
 
 from clientwidget import *
-from oreorepylib.ui.pyqt5.tabbedmdi import TabbedMDIManager, TabWidget, DockableFrame, Duration
+from oreorepylib.ui.pyqt5.tabbedmdi import TabbedMDIManager, TabWidget, DockableFrame, Duration, InitializeTabbedMDI
 
 
 
@@ -290,8 +290,10 @@ class App:
         self.__m_Port = port
 
         self.__m_TabbedMDIManager = TabbedMDIManager()
-        self.__m_DockableID = self.__m_TabbedMDIManager.AddDockable( TabWidget, Duration.Persistent, lambda: self.CreateContentWidgetFunc( "NewSearchTab" ) )
-        #tmdiManager.EnableDefaultAddTab( lambda: CreateContentWidgetFunc( QTextEdit, "NewDefaultTab" ) )
+        self.__m_TabbedMDIManager.EnableDefaultAddTab( lambda: self.CreateContentWidgetFunc( "NewSearchTab" ) )
+        self.__m_DockableID = self.__m_TabbedMDIManager.AddDockable( DockableFrame, Duration.Volatile )
+
+        self.__m_TabbedMDIManager.GetDockable( self.__m_DockableID ).setGeometry( 100, 100, 1200, 600 )
         self.CreateNewTab()
 
         self.__m_TabbedMDIManager.Show()
@@ -312,7 +314,6 @@ class App:
         newContentWidget.setWindowTitle( title )
 
         return newContentWidget, newContentWidget.windowTitle(), id(newContentWidget)
-
 
 
 
@@ -367,13 +368,12 @@ if __name__=="__main__":
     host = args.host
     port = args.port
 
-    #searcher = SearcherClient( host, port )
 
     app = QApplication(sys.argv)
 
-    #mainWidget = ClientWidgetMDI( searcher )
-    #mainWidget.show()
+    InitializeTabbedMDI()
 
     a = App( host, port )
+
 
     sys.exit(app.exec_())

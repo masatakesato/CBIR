@@ -119,10 +119,6 @@ class TabBar( QTabBar ):
     AttachWidgetSignal = pyqtSignal(QPoint)
     DragWidgetSignal = pyqtSignal(QPoint)
 
-    # Special tab index values
-    __INDEX_NONE__ = -1
-    __INDEX_RESET_FOCUS__ = -2 # Used by SetFocusIndex() to detect Floater attachment completion.
-
     # Drag mode
     __DRAG_NONE__ = -1
     __DRAG_TAB__ = 0
@@ -179,10 +175,10 @@ class TabBar( QTabBar ):
 
 #####################################################################################
 
-        self.__m_FocusIndex = TabBar.__INDEX_NONE__
+        self.__m_FocusIndex = -1
 
         self.__m_DragMode = TabBar.__DRAG_NONE__
-        self.__m_CurrIndex = TabBar.__INDEX_NONE__
+        self.__m_CurrIndex = -1
         self.__m_PivotRect = None
         self.__m_bInsidePivot  = False
         self.__m_bEnteredPivot = False
@@ -223,28 +219,21 @@ class TabBar( QTabBar ):
         return self.count() - 1
 
 
-    # index... -1: floater has been dragged to outside tabbar, -2: dragged floater has been released inside tabbar
+
     def SetFocusIndex( self, index ):
 
         if( self.__m_FocusIndex != index ):
             #print( "TabBar::SetFocusIndex()...%s: %d -> %d" % ( self.parentWidget().windowTitle(), self.__m_FocusIndex, index ) )
 
-            if( index == TabBar.__INDEX_RESET_FOCUS__ ):  # Floater has been docked to tabbar
-                self.__SetTabButtonVisible( self.__m_FocusIndex+1, True )
-                #print("show x button: ", self.__m_FocusIndex+1 )
-            elif( index == TabBar.__INDEX_NONE__ ):# On mouse dragging Floater to outside tabbar
-                self.__SetTabButtonVisible( self.__m_FocusIndex, True )
-                #print("show x button: ", self.__m_FocusIndex )
-            elif( self.__m_FocusIndex == TabBar.__INDEX_NONE__ ):# On mouse dragging Floater from outside tabbar
-                self.__SetTabButtonVisible( index, False )
-                #print("hide x button: ", index )
-            else:# Dragging Floater inside tabbar
-                self.__SetTabButtonVisible( index, False )
-                self.__SetTabButtonVisible( self.__m_FocusIndex,True )
-                #print("hide x button: ", index )
-                #print("show x button: ", self.__m_FocusIndex )
+            self.setUpdatesEnabled( False )
 
-            self.__m_FocusIndex = max(index, -1)
+            self.__m_FocusIndex = index
+
+            for i in range( self.count() ):
+                self.__SetTabButtonVisible( i, self.__m_FocusIndex!=i )
+
+            self.setUpdatesEnabled( True )
+
             self.update()
 
 
@@ -367,7 +356,7 @@ class TabBar( QTabBar ):
         elif( self.__m_DragMode==TabBar.__DRAG_TAB__ ):
             self.setTabData( self.__m_CurrIndex, self.SetBit( self.tabData(self.__m_CurrIndex), TabBar.__PIVOT_MASK__, False ) )
 
-        self.__m_CurrIndex = TabBar.__INDEX_NONE__
+        self.__m_CurrIndex = -1
         self.__m_DragMode = TabBar.__DRAG_NONE__
 
         return super(TabBar, self).mouseReleaseEvent(event)
@@ -396,7 +385,7 @@ class TabBar( QTabBar ):
 
         super(TabBar, self).paintEvent(event)
 
-        if( self.__m_FocusIndex != TabBar.__INDEX_NONE__ ):
+        if( self.__m_FocusIndex != -1 ):
             painter = QPainter( self )
             self.initStyleOption( self.__m_Option, self.__m_FocusIndex )
             self.__m_Option.palette = self.__m_Palatte
@@ -955,6 +944,8 @@ class TabbedMDIManager:
             # connect AddTab button function
             if( add_tab_callback ):            
                 newWidget.tabBar().ConnectAddTabCallback( lambda: self.AddTab( newWidget.ID(), *add_tab_callback() ) )
+            elif( self.__m_refDefaultAddTabCallback ):
+                newWidget.tabBar().ConnectAddTabCallback( lambda: self.AddTab( newWidget.ID(), *self.__m_refDefaultAddTabCallback() ) )
 
             self.__m_Dockables[ newWidget.ID() ] = newWidget
             self.__m_Order.append( newWidget.ID() )
@@ -1328,7 +1319,7 @@ class TabbedMDIManager:
 
         # Transfer floater"s content widget to dockable.
         for floater in self.__m_Floaters.values():
-            ownerWidget = self.__m_Dockables[ emptyOwnerIDs.pop() ] if bool(emptyOwnerIDs) else self.__m_Dockables[ self.AddDockable(DockableFrame, Duration.Volatile, self.__m_refDefaultAddTabCallback) ]
+            ownerWidget = self.__m_Dockables[ emptyOwnerIDs.pop() ] if bool(emptyOwnerIDs) else self.__m_Dockables[ self.AddDockable(DockableFrame, Duration.Volatile) ]
             
             if( floater.layout().count() > 0 ):
 
@@ -1360,7 +1351,7 @@ class TabbedMDIManager:
         
         floatingWidgetOpacity = TabbedMDIManager.__c_Opacity[0]
         raiseOwnerIndex = 0
-        tabBarIndex = TabBar.__INDEX_NONE__
+        tabBarIndex = -1
 
         # Check intersection against "active" dockable
         for i, owner_id in enumerate( self.__m_Order ):            
@@ -1394,7 +1385,7 @@ class TabbedMDIManager:
         
         floatingWidgetOpacity = TabbedMDIManager.__c_Opacity[0]
         raiseOwnerIndex = 0
-        tabBarIndex = TabBar.__INDEX_NONE__
+        tabBarIndex = -1
 
         for i, owner_id in enumerate( self.__m_Order ):
 
@@ -1438,7 +1429,7 @@ class TabbedMDIManager:
             tabBar = ownerWidget.tabBar()
             index = tabBar.tabAt( tabBar.mapFromGlobal( globalPos ) )
             
-            if( index != TabBar.__INDEX_NONE__ ):
+            if( index != -1 ):
                 
                 if( floater.layout().count() > 0 ):
                     contentWidget = floater.layout().itemAt(0).widget()
@@ -1447,7 +1438,7 @@ class TabbedMDIManager:
                     ownerWidget.activateWindow()
                     ownerWidget.setWindowOpacity(1.0)
 
-                tabBar.SetFocusIndex( TabBar.__INDEX_RESET_FOCUS__ )# Tell tabbar that Floater attachment is finished by sending -2.
+                tabBar.SetFocusIndex( -1 )
 
                 # Delete floater
                 self.__DeleteFloater( self.__m_CurrFloaterID )
@@ -1474,7 +1465,7 @@ class TabbedMDIManager:
             tabBar = destDockable.tabBar()
             index = tabBar.tabAt( tabBar.mapFromGlobal( globalPos ) )
 
-            if( index != TabBar.__INDEX_NONE__ ):
+            if( index != -1 ):
                 for i in range( numActiveSrcTabs ):
                     # get widget from top
                     contentWidget = srcDockable.widget(0)
@@ -1488,7 +1479,7 @@ class TabbedMDIManager:
                 destDockable.setCurrentIndex( index + srcCurrentIndex )# Restore srcDockable"s current tab selected.
                 destDockable.activateWindow()
         
-                tabBar.SetFocusIndex( TabBar.__INDEX_RESET_FOCUS__ )# Tell tabbar that Dockable attachment is finished by sending -2.
+                tabBar.SetFocusIndex( -1 )
 
                 # Delete dockable
                 self.__DeleteDockable( widget_id )
@@ -1517,30 +1508,46 @@ class TabbedMDIManager:
 
 
 
-#def onTabFocusChanged( old: QWidget, new: QWidget, propertyName: str ) -> None:
-#    #print( "{} -> {}".format( old, new ) )
+#####################################################################################
+#                                                                                   #
+#                                Helper functions                                   #
+#                                                                                   #
+#####################################################################################
 
-#    #print( "/---------------- old -----------------------/")
-#    while( old ):# isinstance(old, QWidget)
-#        #print( old )
-#        if( isinstance( old, QTabWidget ) ):
-#            old.setProperty( propertyName, False )
-#            old.setStyle( old.style() )
-#            tabBar = old.tabBar()
-#            tabBar.setProperty( propertyName, False )
-#            tabBar.setStyle( tabBar.style() )
-#            break
-#        old = old.parentWidget()
+# Tab's focus-changed function.
+def OnTabFocusChanged( old: QWidget, new: QWidget, propertyName: str ) -> None:
+    #print( "{} -> {}".format( old, new ) )
 
-#    #print( "/---------------- new -----------------------/")
-#    while( new ):# isinstance(new, QWidget)
-#        #print( new )
-#        if( isinstance( new, QTabWidget ) ):
-#            new.setProperty( propertyName, True )
-#            new.setStyle( new.style() )
-#            tabBar = new.tabBar()
-#            tabBar.setProperty( propertyName, True )
-#            tabBar.setStyle( tabBar.style() )
-#            break
-#        new = new.parentWidget()       
-#    #print( "" )
+    #print( "/---------------- old -----------------------/")
+    while( old ):# isinstance(old, QWidget)
+        #print( old )
+        if( isinstance( old, QTabWidget ) ):
+            old.setProperty( propertyName, False )
+            old.setStyle( old.style() )
+            tabBar = old.tabBar()
+            tabBar.setProperty( propertyName, False )
+            tabBar.setStyle( tabBar.style() )
+            break
+        old = old.parentWidget()
+
+    #print( "/---------------- new -----------------------/")
+    while( new ):# isinstance(new, QWidget)
+        #print( new )
+        if( isinstance( new, QTabWidget ) ):
+            new.setProperty( propertyName, True )
+            new.setStyle( new.style() )
+            tabBar = new.tabBar()
+            tabBar.setProperty( propertyName, True )
+            tabBar.setStyle( tabBar.style() )
+            break
+        new = new.parentWidget()       
+    #print( "" )
+
+
+
+# Need to call this function right after QApplication declaration, if you use TabbedMDI GUI features.
+def InitializeTabbedMDI( on_tab_focus_changed_slot: typing.Callable=OnTabFocusChanged ):
+
+    app = QApplication.instance()
+    app.setStyle( "Fusion" )# Required for overriding QTabBartab::paintEvent.
+    app.focusChanged.connect( lambda old, new: on_tab_focus_changed_slot( old, new, "TabWidgetFocus" ) )# Mimics tabs focus-changed using stylesheet.

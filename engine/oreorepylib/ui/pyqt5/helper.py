@@ -3,14 +3,14 @@ from PyQt5.QtCore import QObject
 
 
 
-def getSignal( oObject: QObject, strSignalName: str ):
+def GetSignal( oObject: QObject, strSignalName: str ):
     oMetaObj = oObject.metaObject()
-    for i in range (oMetaObj.methodCount()):
+    for i in range( oMetaObj.methodCount() ):
         oMetaMethod = oMetaObj.method(i)
-        if not oMetaMethod.isValid():
+        if( not oMetaMethod.isValid() ):
             continue
-        if oMetaMethod.methodType () == QMetaMethod.Signal and \
-            oMetaMethod.name() == strSignalName:
+        if( oMetaMethod.methodType () == QMetaMethod.Signal and \
+            oMetaMethod.name() == strSignalName ):
             return oMetaMethod
 
     return None
@@ -18,6 +18,6 @@ def getSignal( oObject: QObject, strSignalName: str ):
 
 
 def SafeDisconnectSignal( oObject: QObject, strSignalName: str ):
-    if( oObject.isSignalConnected( getSignal(oObject, strSignalName) ) ):
+    if( oObject.isSignalConnected( GetSignal(oObject, strSignalName) ) ):
         print("  disconnecting signal", strSignalName )
         getattr( oObject, strSignalName ).disconnect()
