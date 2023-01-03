@@ -10,20 +10,20 @@ from oreorepylib.ui.pyqt5.tabbedmdi import TabbedMDIManager, TabWidget, Dockable
 
 
 
-class ClientWidgetMDI( QWidget ):#MainWindow ):#QFrame):#
+class ClientWidgetMDI( QFrame ):#QWidget ):#MainWindow ):#
 
     sig_add_item = pyqtSignal()
     sig_add_showmore_button = pyqtSignal()
     sig_remove_showmore_button = pyqtSignal()
     sig_showloading = pyqtSignal()
     sig_hideloading = pyqtSignal()
-    sig_showstatus = pyqtSignal( str, float )
+    sig_showstatus = pyqtSignal( str, int )
 
 
     def __init__( self, searcher ):
         super(ClientWidgetMDI, self).__init__()
 
-        self.setWindowTitle( "OreOre Visual Search" )
+        #self.setWindowTitle( "OreOre Visual Search" )
         self.setAcceptDrops(True)
 
         self.__m_PushButton = {}
@@ -84,8 +84,9 @@ class ClientWidgetMDI( QWidget ):#MainWindow ):#QFrame):#
 
 
         self.__m_StatusBar = QStatusBar()
-        self.__m_StatusBar.setStyleSheet( stylesheet.g_StatusBarStyleSheet )
+        self.__m_StatusBar.setStyleSheet( stylesheet.g_EmbeddedStatusBarStyleSheet )
         self.__m_StatusBar.setSizePolicy( QSizePolicy.Expanding, QSizePolicy.Fixed )
+        self.__m_StatusBar.setSizeGripEnabled( False )
         #self.setStatusBar( self.__m_StatusBar )
 
         # create 
@@ -93,6 +94,8 @@ class ClientWidgetMDI( QWidget ):#MainWindow ):#QFrame):#
         vboxlayout.setSpacing(0)
         vboxlayout.setContentsMargins(6, 0, 6, 6)
         vboxlayout.addWidget( self.__m_Hsplitter )
+        vboxlayout.addWidget( self.__m_StatusBar )
+
 
         self.setLayout( vboxlayout )
         self.setGeometry( 100, 100, 1200, 400 )
@@ -219,7 +222,7 @@ class ClientWidgetMDI( QWidget ):#MainWindow ):#QFrame):#
 
             query_img = self.__m_QueryFrame.GetImageData()
             if( query_img is None ):
-                self.sig_showstatus.emit( "Aborted searching: No query image specified...", 5000.0 )
+                self.sig_showstatus.emit( "Aborted searching: No query image specified...", 5000 )
                 #print( "No query images..." )
                 self.__m_PushButton["Search"].setEnabled(True)
                 self.sig_hideloading.emit()
@@ -227,7 +230,7 @@ class ClientWidgetMDI( QWidget ):#MainWindow ):#QFrame):#
 
             input_shape = self.__m_refSearcher.InputShape()# (batch_size, height, width, channels)
             if( input_shape is None ):
-                self.sig_showstatus.emit( "Aborted search: Failed connecting to server...", 5000.0 )
+                self.sig_showstatus.emit( "Aborted search: Failed connecting to server...", 5000 )
                 self.__m_PushButton["Search"].setEnabled(True)
                 self.sig_hideloading.emit()
                 return
@@ -247,7 +250,7 @@ class ClientWidgetMDI( QWidget ):#MainWindow ):#QFrame):#
 
             self.__m_PushButton["Search"].setEnabled(True)
             self.sig_hideloading.emit()
-            self.sig_showstatus.emit( "Done.", 5000.0 )
+            self.sig_showstatus.emit( "Done.", 5000 )
 
         except:
             print( "Exception occured at __Search" )
@@ -267,7 +270,7 @@ class ClientWidgetMDI( QWidget ):#MainWindow ):#QFrame):#
             self.__m_PushButton["Search"].setEnabled(True)
 
             self.sig_hideloading.emit()
-            self.sig_showstatus.emit( "Done.", 5000.0 )
+            self.sig_showstatus.emit( "Done.", 5000 )
 
         except:
             print( "Exception occured at __ShowMoreResults" )
@@ -290,20 +293,26 @@ class App:
         self.__m_Port = port
 
         self.__m_TabbedMDIManager = TabbedMDIManager()
-        self.__m_TabbedMDIManager.EnableDefaultAddTab( lambda: self.CreateContentWidgetFunc( "NewSearchTab" ) )
-        self.__m_DockableID = self.__m_TabbedMDIManager.AddDockable( DockableFrame, Duration.Volatile )
+        self.__m_TabbedMDIManager.EnableAddTabButtonByDefault( lambda: self.CreateContentWidgetFunc( "NewSearchTab" ) )
+        self.__m_TabbedMDIManager.EnableDynamicTitleByDefault( False )
 
-        self.__m_TabbedMDIManager.GetDockable( self.__m_DockableID ).setGeometry( 100, 100, 1200, 600 )
-        self.CreateNewTab()
+        self.__m_DockableID = self.__m_TabbedMDIManager.AddDockable( DockableFrame, Duration.Persistent, None, False )
+
+        dockable = self.__m_TabbedMDIManager.GetDockable( self.__m_DockableID )
+        dockable.setWindowTitle( "OreOre Visual Search" )
+        #dockable.EnableDynamicTitle( True )
+        dockable.setGeometry( 100, 100, 1200, 600 )
+        self.CreateNewTab( "NewSearch" )
 
         self.__m_TabbedMDIManager.Show()
 
 
 
-    def CreateNewTab( self ):
+    def CreateNewTab( self, title: str ):
         searcher = SearcherClient( self.__m_Host, self.__m_Port )
         newContentWidget = ClientWidgetMDI( searcher )
-        self.__m_TabbedMDIManager.AddTab( self.__m_DockableID, newContentWidget, "NewSearch", id(newContentWidget) )
+        newContentWidget.setWindowTitle( title )
+        self.__m_TabbedMDIManager.AddTab( self.__m_DockableID, newContentWidget, newContentWidget.windowTitle(), id(newContentWidget) )
 
 
 

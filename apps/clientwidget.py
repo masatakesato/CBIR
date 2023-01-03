@@ -465,7 +465,7 @@ class ClientWidget( MainWindow ):#QFrame):#
     sig_remove_showmore_button = pyqtSignal()
     sig_showloading = pyqtSignal()
     sig_hideloading = pyqtSignal()
-    sig_showstatus = pyqtSignal( str, float )
+    sig_showstatus = pyqtSignal( str, int )
 
 
     def __init__( self, searcher ):
@@ -667,7 +667,7 @@ class ClientWidget( MainWindow ):#QFrame):#
 
             query_img = self.__m_QueryFrame.GetImageData()
             if( query_img is None ):
-                self.sig_showstatus.emit( "Aborted searching: No query image specified...", 5000.0 )
+                self.sig_showstatus.emit( "Aborted searching: No query image specified...", 5000 )
                 #print( "No query images..." )
                 self.__m_PushButton["Search"].setEnabled(True)
                 self.sig_hideloading.emit()
@@ -675,7 +675,7 @@ class ClientWidget( MainWindow ):#QFrame):#
 
             input_shape = self.__m_refSearcher.InputShape()# (batch_size, height, width, channels)
             if( input_shape is None ):
-                self.sig_showstatus.emit( "Aborted search: Failed connecting to server...", 5000.0 )
+                self.sig_showstatus.emit( "Aborted search: Failed connecting to server...", 5000 )
                 self.__m_PushButton["Search"].setEnabled(True)
                 self.sig_hideloading.emit()
                 return
@@ -695,7 +695,7 @@ class ClientWidget( MainWindow ):#QFrame):#
 
             self.__m_PushButton["Search"].setEnabled(True)
             self.sig_hideloading.emit()
-            self.sig_showstatus.emit( "Done.", 5000.0 )
+            self.sig_showstatus.emit( "Done.", 5000 )
 
         except:
             print( "Exception occured at __Search" )
@@ -715,7 +715,7 @@ class ClientWidget( MainWindow ):#QFrame):#
             self.__m_PushButton["Search"].setEnabled(True)
 
             self.sig_hideloading.emit()
-            self.sig_showstatus.emit( "Done.", 5000.0 )
+            self.sig_showstatus.emit( "Done.", 5000 )
 
         except:
             print( "Exception occured at __ShowMoreResults" )

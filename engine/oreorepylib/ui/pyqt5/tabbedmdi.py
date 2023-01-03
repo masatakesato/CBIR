@@ -616,18 +616,26 @@ class DockableFrame( Frame ):
     ReleaseSignal = pyqtSignal(object, QPoint)
 
 
+    def OnTitleChange( self, s ):
+        self.__m_Title = s
+
+
+
     def __init__( self, *args, **kwargs ):
         super(DockableFrame, self).__init__(*args, **kwargs)
 
-        self.setWindowTitle( "        " )
+        self.__m_Title = "        "
+        self.__m_DynamicTitle = True
+
+        self.setWindowTitle( self.__m_Title )
         self.Resize( 512, 512 )
         self.setLayout( QVBoxLayout() )
         self.layout().setContentsMargins( 4, 4, 4, 4 )
+        self.WindowTitleChanged.connect( self.OnTitleChange )
 
         self.__m_TabWidget = TabWidget()
+        self.__m_TabWidget.currentChanged.connect( self.__UpdateWindowTitle )
         self.layout().addWidget( self.__m_TabWidget )
-
-        self.__m_TabWidget.currentChanged.connect( self.__SetWindowTitle )
 
         self.CleanupSignal = self.__m_TabWidget.CleanupSignal
         self.tabCloseRequested = self.__m_TabWidget.tabCloseRequested
@@ -670,6 +678,19 @@ class DockableFrame( Frame ):
 
     def SetDuration( self, duration: Duration ) -> None:
         self.__m_TabWidget.SetDuration(duration)
+
+
+
+    def EnableDynamicTitle( self, enable: bool ):
+        #print("EnableDynamicTitle", enable )
+        if( enable==False ):
+            self.setWindowTitle( self.__m_Title )
+        self.__m_DynamicTitle = enable
+
+
+
+    def IsDynamicTitle( self ):
+        return self.__m_DynamicTitle
 
 
 
@@ -750,8 +771,9 @@ class DockableFrame( Frame ):
 
 
 
-    def __SetWindowTitle( self, index: int ) -> None:
-        self.setWindowTitle( self.__m_TabWidget.tabText(index) )
+    def __UpdateWindowTitle( self, index: int ) -> None:
+        if( self.__m_DynamicTitle ):
+            self.setWindowTitle( self.__m_TabWidget.tabText(index) )
 
 
 
@@ -877,6 +899,7 @@ class TabbedMDIManager:
         self.__m_CurrFloaterID = None
 
         self.__m_refDefaultAddTabCallback = None
+        self.__m_DefaultDynamicTitle = True
 
 
 
@@ -918,7 +941,7 @@ class TabbedMDIManager:
 
 
 
-    def EnableDefaultAddTab( self, callback: typing.Callable ) -> bool:
+    def EnableAddTabButtonByDefault( self, callback: typing.Callable ) -> bool:
         try:
 
             if( not isinstance(callback, typing.Callable) ):
@@ -933,12 +956,17 @@ class TabbedMDIManager:
 
 
 
-    def DisableDefaultAddTab( self ):
+    def DisableAddTabButtonByDefault( self ):
         self.__m_refDefaultAddTabCallback = None
 
 
 
-    def AddDockable( self, widget_type: type, duration: Duration=Duration.Volatile, add_tab_callback: typing.Callable=None ) -> typing.Any:
+    def EnableDynamicTitleByDefault( self, enable: bool ):
+        self.__m_DefaultDynamicTitle = enable
+
+
+
+    def AddDockable( self, widget_type: type, duration: Duration=Duration.Volatile, add_tab_callback: typing.Callable=None, dynamic_title: bool=None ) -> typing.Any:
         try:
             newWidget = widget_type()
             newWidget.SetDuration( duration )
@@ -949,6 +977,10 @@ class TabbedMDIManager:
             if( widget_type is DockableFrame ):
                 newWidget.MoveSignal.connect( self.__CheckDockableIntersection )
                 newWidget.ReleaseSignal.connect( self.__AttachDockable )
+                if( dynamic_title is not None ):
+                    newWidget.EnableDynamicTitle( dynamic_title )
+                else:
+                    newWidget.EnableDynamicTitle( self.__m_DefaultDynamicTitle )
 
             # connect tabbar signals
             newWidget.tabBar().DetachWidgetSignal.connect( lambda index: self.__DetachFloater( newWidget.ID(), index ) )
@@ -956,7 +988,7 @@ class TabbedMDIManager:
             newWidget.tabBar().DragWidgetSignal.connect( self.__DragFloater )
 
             # connect AddTab button function
-            if( add_tab_callback ):            
+            if( add_tab_callback is not None ):
                 newWidget.tabBar().ConnectAddTabCallback( lambda: self.AddTab( newWidget.ID(), *add_tab_callback() ) )
             elif( self.__m_refDefaultAddTabCallback ):
                 newWidget.tabBar().ConnectAddTabCallback( lambda: self.AddTab( newWidget.ID(), *self.__m_refDefaultAddTabCallback() ) )
@@ -1139,12 +1171,12 @@ class TabbedMDIManager:
             widget = contentWidget.parentWidget()
             bUpdateTitle = False
 
-            while( widget ):
+            while( widget ):# Retrieva parent DockableFrame
 
-                if( type(widget) is DockableFrame ):
+                if( type(widget) is DockableFrame ):# break loop if DockableFrame is detected
                     break
 
-                elif( type(widget) is TabWidget ):
+                elif( type(widget) is TabWidget ):# Update TabWidget's window title.
                     contentIndex = widget.indexOf( contentWidget )
                     widget.setTabText( contentIndex, title )
 
@@ -1153,7 +1185,7 @@ class TabbedMDIManager:
 
                 widget = widget.parentWidget()
 
-            if( bUpdateTitle ):
+            if( bUpdateTitle and self.__m_DefaultDynamicTitle and widget.IsDynamicTitle() ):
                 widget.setWindowTitle( title )
                 print( "TabbedMDIManager::SetTabTitle()... {}".format( title ) )
 

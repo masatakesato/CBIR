@@ -268,6 +268,7 @@ class TitleBar( QFrame ):
 
 class Frame( QFrame ):
 
+    # Resize handle indices
     TopLeft = 1
     Top = 2
     TopRight = 3
@@ -276,6 +277,9 @@ class Frame( QFrame ):
     BottomLeft = 6
     Bottom = 7
     BottomRight = 8
+
+    # Signals
+    WindowTitleChanged = pyqtSignal( object )
 
 
     def __init__(self, parent=None):
@@ -399,6 +403,7 @@ class Frame( QFrame ):
 
     def setWindowTitle( self, title: str ) -> None:
         self.m_titleBar.setLabel(title)
+        self.WindowTitleChanged.emit( title )
 
 
 

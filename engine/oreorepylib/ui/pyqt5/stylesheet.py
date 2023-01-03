@@ -221,6 +221,29 @@ QSizeGrip
 
 
 
+g_EmbeddedStatusBarStyleSheet = """
+QStatusBar
+{
+    color: rgb(235,235,235);
+    background-color: rgb(48,48,48);
+
+    min-height: 18;
+    max-height: 18;
+
+    margin: 0px 0px 0px 0px;
+    border: 0px none;
+    padding: 0px 0px 0px 0px;
+}
+
+QSizeGrip
+{
+    background-color: none;
+}
+
+"""
+
+
+
 g_ButtonStyleSheet = """
 QPushButton
 {
