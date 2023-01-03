@@ -588,8 +588,15 @@ class TabWidget( QTabWidget ):
 
     def raise_( self ):
         #print( "TabWidget::raise_()...%s" % self.windowTitle() )
+        # Emit raise signal
         self.RaiseSignal.emit( self.__m_ID )
-        return super(TabWidget, self).raise_()
+
+        # Do qt raise operation by checking topmost widget
+        topmostWidget = self
+        while( topmostWidget.parentWidget() ):
+            topmostWidget = topmostWidget.parentWidget()
+
+        return super(TabWidget, self).raise_() if topmostWidget is self else topmostWidget.raise_()
 
 
 
@@ -832,8 +839,15 @@ class DockableFrame( Frame ):
 
     def raise_( self ):
         #print( "DockableFrame::raise_()...%s" % self.windowTitle() )
+        # Emit raise signal
         self.RaiseSignal.emit( self.__m_ID )
-        return super(DockableFrame, self).raise_()
+
+        # Do qt raise operation by checking topmost widget
+        topmostWidget = self
+        while( topmostWidget.parentWidget() ):
+            topmostWidget = topmostWidget.parentWidget()
+
+        return super(DockableFrame, self).raise_() if topmostWidget is self else topmostWidget.raise_()
 
 
 
@@ -1313,7 +1327,7 @@ class TabbedMDIManager:
 
 
     def __MergeDockables( self ):
-        print( "TabbedMDIManager::__MergeDockables()..." )
+        #print( "TabbedMDIManager::__MergeDockables()..." )
 
         emptyOwnerIDs = [ owner_id for owner_id, widget in self.__m_Dockables.items() if widget.IsTrashed() ]
 
@@ -1372,8 +1386,8 @@ class TabbedMDIManager:
                 break
 
         if( raiseOwnerIndex > 0 ):
-            self.__m_Dockables[ self.__m_Order[ raiseOwnerIndex ] ].raise_()
-            self.__m_Floaters[ widget_id ].raise_()
+            self.__m_Dockables[ self.__m_Order[ raiseOwnerIndex ] ].raise_()# raise overlapped widget to second top
+            self.__m_Floaters[ widget_id ].raise_()# raise me to top
 
         if( floatingWidgetOpacity != self.__m_Floaters[ widget_id ].windowOpacity() ):
             self.__m_Floaters[ widget_id ].setWindowOpacity( floatingWidgetOpacity )
@@ -1406,8 +1420,8 @@ class TabbedMDIManager:
                 break
 
         if( raiseOwnerIndex > 1 ):
-            self.__m_Dockables[ self.__m_Order[ raiseOwnerIndex ] ].raise_()
-            self.__m_Dockables[ widget_id ].raise_()
+            self.__m_Dockables[ self.__m_Order[ raiseOwnerIndex ] ].raise_()# raise overlapped widget to second top
+            self.__m_Dockables[ widget_id ].raise_()# raise me to top
 
         if( floatingWidgetOpacity != self.__m_Dockables[ widget_id ].windowOpacity() ):
             self.__m_Dockables[ widget_id ].setWindowOpacity( floatingWidgetOpacity )
@@ -1424,7 +1438,7 @@ class TabbedMDIManager:
         for owner_id in self.__m_Order:
 
             ownerWidget = self.__m_Dockables[ owner_id ]
-            if( not ownerWidget.IsActive() ): continue
+            if( not ownerWidget.IsActive() ): continue# Ignore me and search next topmost
 
             tabBar = ownerWidget.tabBar()
             index = tabBar.tabAt( tabBar.mapFromGlobal( globalPos ) )
@@ -1446,6 +1460,8 @@ class TabbedMDIManager:
 
                 break
 
+            break
+
         self.__MergeDockables()
 
 
@@ -1458,9 +1474,9 @@ class TabbedMDIManager:
         srcCurrentIndex = srcDockable.currentIndex()
 
         for owner_id in self.__m_Order:
-
+            
             destDockable = self.__m_Dockables[ owner_id ]
-            if( not destDockable.IsActive() ): continue
+            if( not destDockable.IsActive() ):  continue# Ignore me and search next topmost
 
             tabBar = destDockable.tabBar()
             index = tabBar.tabAt( tabBar.mapFromGlobal( globalPos ) )
@@ -1489,6 +1505,7 @@ class TabbedMDIManager:
 
                 break
 
+            break
 
 
     # Debug print dockables/contentWidgets status
