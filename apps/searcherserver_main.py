@@ -46,9 +46,9 @@ if __name__ == '__main__':
 
 
         #=========== Load index path from config.json ========#
-        path_settings = package_dir / "config.json"
+        path_config = package_dir / "config.json"
 
-        with open( path_settings, "r", encoding="utf-8_sig" ) as f:
+        with open( path_config, "r", encoding="utf-8_sig" ) as f:
             settings = json.load(f)
         path_index = pathlib.Path( settings["index_path"] )
 

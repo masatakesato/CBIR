@@ -45,6 +45,9 @@ def AlignImage( pil_img, img_size, background_color ):
 # image frame
 class ImageFrame( QFrame ):
 
+    OnItemDropped = pyqtSignal(object)
+
+
     def __init__( self, parent=None ):
         super(ImageFrame, self).__init__(parent)
 
@@ -88,6 +91,8 @@ class ImageFrame( QFrame ):
         for url in event.mimeData().urls():
             #filepath = str(url.toLocalFile())
             self.LoadImage( str(url.toLocalFile()) )
+            self.OnItemDropped.emit( pathlib.Path(url.toLocalFile()).name )
+            
 
 
     def resizeEvent( self, event ):

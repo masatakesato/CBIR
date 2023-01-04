@@ -1,4 +1,5 @@
-﻿import sys
+﻿import functools
+import sys
 import argparse
 
 from import_engine import *
@@ -118,6 +119,11 @@ class ClientWidgetMDI( QFrame ):#QWidget ):#MainWindow ):#
         self.sig_hideloading.connect( self.__m_Overlay.hide )
 
         self.sig_showstatus.connect( self.ShowStatusMessage )
+
+
+
+    def OnItemDropped( self ):
+        return self.__m_QueryFrame.OnItemDropped
 
 
 
@@ -293,7 +299,7 @@ class App:
         self.__m_Port = port
 
         self.__m_TabbedMDIManager = TabbedMDIManager()
-        self.__m_TabbedMDIManager.EnableAddTabButtonByDefault( lambda: self.CreateContentWidgetFunc( "NewSearchTab" ) )
+        self.__m_TabbedMDIManager.EnableAddTabButtonByDefault( lambda: self.CreateContentWidgetFunc( "New Tab" ) )
         self.__m_TabbedMDIManager.EnableDynamicTitleByDefault( False )
 
         self.__m_DockableID = self.__m_TabbedMDIManager.AddDockable( DockableFrame, Duration.Persistent, None, False )
@@ -302,27 +308,31 @@ class App:
         dockable.setWindowTitle( "OreOre Visual Search" )
         #dockable.EnableDynamicTitle( True )
         dockable.setGeometry( 100, 100, 1200, 600 )
-        self.CreateNewTab( "NewSearch" )
+        self.CreateNewTab( "New Tab" )
 
         self.__m_TabbedMDIManager.Show()
 
 
 
-    def CreateNewTab( self, title: str ):
-        searcher = SearcherClient( self.__m_Host, self.__m_Port )
-        newContentWidget = ClientWidgetMDI( searcher )
-        newContentWidget.setWindowTitle( title )
-        self.__m_TabbedMDIManager.AddTab( self.__m_DockableID, newContentWidget, newContentWidget.windowTitle(), id(newContentWidget) )
-
-
-
     def CreateContentWidgetFunc( self, title: str ):
-
         searcher = SearcherClient( self.__m_Host, self.__m_Port )
         newContentWidget = ClientWidgetMDI( searcher )
         newContentWidget.setWindowTitle( title )
+        newContentWidget.OnItemDropped().connect( functools.partial( self.__UpdateTabTitle, widget_id=id(newContentWidget) ) )
 
         return newContentWidget, newContentWidget.windowTitle(), id(newContentWidget)
+
+
+
+    def CreateNewTab( self, title: str ):
+        self.__m_TabbedMDIManager.AddTab( self.__m_DockableID, *self.CreateContentWidgetFunc(title) )
+        
+
+
+    def __UpdateTabTitle( self, title: str, widget_id: any ):
+
+        print( "__UpdateTabTitle", title )
+        self.__m_TabbedMDIManager.SetTabTitle( widget_id, title )
 
 
 

@@ -16,10 +16,10 @@ if __name__=="__main__":
 
 
         #=========== Load Crawl config from json ===============#
-        path_settings = package_dir / "config.json"
+        path_config = package_dir / "config.json"
 
         # https://qiita.com/Yuu94/items/9ffdfcb2c26d6b33792e windowsだとエンコードで引っかかる
-        with open( path_settings, "r", encoding="utf-8_sig" ) as f:
+        with open( path_config, "r", encoding="utf-8_sig" ) as f:
             settings = json.load(f)
 
         search_paths = settings["search_paths"]
