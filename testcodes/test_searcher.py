@@ -1,10 +1,10 @@
-﻿import oreorepylib.utils.environment
-
+﻿import os
+import json
 import pathlib
 from PIL import Image
 
-
-from Searcher import Searcher
+from import_engine import *
+from searchengine import SearchEngine
 
 
 
@@ -28,28 +28,37 @@ def AlignImage( pil_img, img_size, background_color ):
 
 
 
-path_root = pathlib.Path( '../data' )
-path_query = pathlib.Path( './testimage.JPG' )
-
+path_query = pathlib.Path( "./data/query.png" )
+path_config = pathlib.Path( "./config.json" )
 
 
 if __name__ == '__main__':
 
-    searcher = Searcher()
-    searcher.Init( path_root )
+    #============= Load index path from config.json ========#
+    with open( path_config, "r", encoding="utf-8_sig" ) as f:
+        settings = json.load(f)
+    path_index = pathlib.Path( settings["index_path"] )
 
+    searcher = SearchEngine()
+    searcher.Init( path_index, "https://tfhub.dev/google/imagenet/inception_v3/feature_vector/5", [None, 299, 299, 3] )
+
+
+    #============= Setup query image data ==================#
     input_shape = searcher.InputShape()
     img_size = ( input_shape[2], input_shape[1] )
 
-    query_img = Image.open( str(path_query) ).convert('RGB')
+    query_img = Image.open( str(path_query) ).convert("RGB")
     query_img = AlignImage( query_img, img_size, (0,0,0) )
         
     pixel_data = list( query_img.getdata() )
 
+
+    #============= Setup query image data ==================#
+
     results = searcher.Search( [ pixel_data ] )
 
-    p = pathlib.Path( results[0][2] )
-
-    print( p )
+    for i in range(10):
+        p = pathlib.Path( results[i][2] )
+        print( p )
 
     

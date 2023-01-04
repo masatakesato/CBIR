@@ -3,6 +3,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
+from import_engine import *
+from wrangler_tf2 import MovieWrangler
+
+
+
+src_path = pathlib.Path( "./data/test.mp4" )
+npy_path = pathlib.Path( "./testout/test_wrangled.npy" )
 
 
 def Plt_Preview( path ):
@@ -37,7 +44,18 @@ def Plt_Preview( path ):
 
 
 
-if __name__=='__main__':
 
-    npz_path = pathlib.Path( "../data/wrangled/wrangled_000000.npz" )# './test_out.npz' )
-    Plt_Preview( npz_path, '3' )#'arr_0' )
+
+if __name__=="__main__":
+    
+    wrangler = MovieWrangler( 50 )
+        
+    np_data = wrangler.run( str(src_path) )
+        
+    if( np_data.any() ):
+        # Save as npy
+        np.save( npy_path, np_data.astype( np.uint8 ) )
+        print( "    Saved result to: %s" % npy_path.name )
+
+        # Preview
+        Plt_Preview( npy_path )
