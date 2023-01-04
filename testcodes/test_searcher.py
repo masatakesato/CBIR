@@ -30,15 +30,12 @@ def AlignImage( pil_img, img_size, background_color ):
 
 path_query = pathlib.Path( "./data/query.png" )
 path_config = pathlib.Path( "./config.json" )
+path_index = pathlib.Path( "../index" )
 
 
 if __name__ == '__main__':
 
-    #============= Load index path from config.json ========#
-    with open( path_config, "r", encoding="utf-8_sig" ) as f:
-        settings = json.load(f)
-    path_index = pathlib.Path( settings["index_path"] )
-
+    #============= Initialize search engine ================#
     searcher = SearchEngine()
     searcher.Init( path_index, "https://tfhub.dev/google/imagenet/inception_v3/feature_vector/5", [None, 299, 299, 3] )
 
@@ -54,9 +51,7 @@ if __name__ == '__main__':
 
 
     #============= Setup query image data ==================#
-
     results = searcher.Search( [ pixel_data ] )
-
     for i in range(10):
         p = pathlib.Path( results[i][2] )
         print( p )
