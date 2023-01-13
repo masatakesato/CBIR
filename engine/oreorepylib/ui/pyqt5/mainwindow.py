@@ -13,7 +13,7 @@ from .stylesheet import *
 class MainWindow( Frame ):
 
     def __init__( self, parent=None ):
-        super(MainWindow, self).__init__(parent=parent)
+        super().__init__(parent=parent)
 
         self.__m_MenuBar = QMenuBar( self )
         self.__m_MenuBar.setStyleSheet( g_MenuBarStyleSheet + g_MenuStyleSheet )
@@ -85,4 +85,4 @@ class MainWindow( Frame ):
         if( event.type()==QEvent.StatusTip ):
             if( self.__m_StatusBar ): self.__m_StatusBar.showMessage( event.tip() )
 
-        return super(Frame, self).event(event)
+        return super().event(event)

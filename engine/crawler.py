@@ -11,7 +11,7 @@ import pickle
 class FileCrawler:
 
     def __init__( self, search_paths=[], types=[] ):
-        super( FileCrawler, self ).__init__()
+        super().__init__()
 
         self.__m_SearchPaths = [ pathlib.Path(r) for r in search_paths ]
         self.__m_Types = types

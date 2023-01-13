@@ -22,7 +22,7 @@ class ClientWidgetMDI( QFrame ):#QWidget ):#MainWindow ):#
 
 
     def __init__( self, searcher ):
-        super(ClientWidgetMDI, self).__init__()
+        super().__init__()
 
         #self.setWindowTitle( "OreOre Visual Search" )
         self.setAcceptDrops(True)
@@ -341,7 +341,7 @@ class App:
 class SearcherClient( tcp.Client ):
 
     def __init__( self, host, port ):
-        super(SearcherClient, self).__init__( host, port, 60, 5 )
+        super().__init__( host, port, 60, 5 )
         #self.client = tcp.Client( host, port, 60, 5 )
     
     #def IsReady( self ):

@@ -14,11 +14,11 @@ class ScrollBar( QScrollBar ):
 
 
     def __init__( self, parent=None ):
-        super( ScrollBar, self ).__init__( parent )
+        super().__init__( parent )
 
 
     def wheelEvent( self, event ):
-        super(ScrollBar, self).wheelEvent(event)
+        super().wheelEvent(event)
 
         if( self.isEnabled() ):
             if( self.value() == self.maximum() and event.angleDelta().y() < -10 ):
@@ -31,7 +31,7 @@ class ScrollBar( QScrollBar ):
 
 
     def mouseMoveEvent(self, QMouseEvent):
-        super(ScrollBar, self).mouseMoveEvent(QMouseEvent)
+        super().mouseMoveEvent(QMouseEvent)
 
         if( self.isEnabled() ):
             if( self.value() == self.maximum() ):
@@ -44,7 +44,7 @@ class ScrollBar( QScrollBar ):
 
 
     def mousePressEvent( self, QMouseEvent ):
-        super(ScrollBar, self).mousePressEvent(QMouseEvent)
+        super().mousePressEvent(QMouseEvent)
 
         if( self.isEnabled() ):
             if( self.value() == self.maximum() ):
@@ -61,7 +61,7 @@ class ScrollBar( QScrollBar ):
 class ScrollArea( QScrollArea ):
     
     def __init__( self, parent=None ):
-        super(ScrollArea, self).__init__(parent=parent)
+        super().__init__(parent=parent)
 
         self.setVerticalScrollBar( ScrollBar(self) ) 
         self.setHorizontalScrollBar( ScrollBar(self) )
@@ -75,7 +75,7 @@ class FlowLayout( QLayout ):
     heightChanged = pyqtSignal(int)
 
     def __init__( self, parent=None, mergin=0, spacing=-1 ):
-        super(QLayout, self).__init__(parent)
+        super().__init__(parent)
         
         self.setSpacing( spacing )
 
@@ -127,7 +127,7 @@ class FlowLayout( QLayout ):
 
 
     def setGeometry( self, rect ):
-        super(FlowLayout, self).setGeometry(rect)
+        super().setGeometry(rect)
         self._do_layout( rect, False )
 
 

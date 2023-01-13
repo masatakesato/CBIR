@@ -71,7 +71,7 @@ class ResizeHandle( QFrame ):
     }
 
     def __init__(self, region='Center', parent=None):
-        super(ResizeHandle, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         
         self.setStyleSheet( g_ResizeHandleStyleSheet )
         self.__m_Region = self.region_info[region][0]
@@ -84,12 +84,12 @@ class ResizeHandle( QFrame ):
 
     def enterEvent( self, event ):
         self.setCursor( self.__m_Cursor )
-        return super(ResizeHandle, self).enterEvent(event)
+        return super().enterEvent(event)
 
 
     def leaveEvent( self, event ):
         self.setCursor( Qt.ArrowCursor )
-        return super(ResizeHandle, self).leaveEvent(event)
+        return super().leaveEvent(event)
 
 
 
@@ -105,7 +105,7 @@ class TitleButton( QFrame ):
     clicked = pyqtSignal()
 
     def __init__( self, *args, **kwargs ):
-        super(TitleButton, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.setAttribute( Qt.WA_NoMousePropagation )
         self.setFocusPolicy( Qt.NoFocus )
@@ -132,7 +132,7 @@ class TitleButton( QFrame ):
     def mousePressEvent( self, event ):
         #print( 'TitleButton::mousePressEvent()...' )
         self.__UpdateInsideProperty( True )
-        return super(TitleButton, self).mousePressEvent(event)
+        return super().mousePressEvent(event)
 
 
 
@@ -142,7 +142,7 @@ class TitleButton( QFrame ):
         if( self.__m_Inside != isInside ):
             #print( 'In/Out Changed {}'.format( self.rect().contains( event.pos() ) ) )
             self.__UpdateInsideProperty( isInside )
-        return super(TitleButton, self).mouseMoveEvent(event)
+        return super().mouseMoveEvent(event)
 
 
 
@@ -151,7 +151,7 @@ class TitleButton( QFrame ):
         if( self.rect().contains( event.pos() ) ):
             self.clicked.emit()
         self.__UpdateInsideProperty( False )
-        return super(TitleButton, self).mouseReleaseEvent(event)
+        return super().mouseReleaseEvent(event)
 
 
 
@@ -165,7 +165,7 @@ class TitleButton( QFrame ):
 class TitleBar( QFrame ):
 
     def __init__( self, ownerWidget: QWidget ):
-        super(TitleBar, self).__init__()
+        super().__init__()
 
         self.setStyleSheet( g_TitleBarStyleSheet )
         self.setAutoFillBackground( True )
@@ -239,7 +239,7 @@ class TitleBar( QFrame ):
         if( event.button() == Qt.LeftButton ):
             self.moving = True
             self.offset = self.mapToParent( event.pos() )
-        return super(TitleBar, self).mousePressEvent(event)
+        return super().mousePressEvent(event)
 
 
 
@@ -247,13 +247,13 @@ class TitleBar( QFrame ):
         self.setCursor(Qt.ArrowCursor)
         if( self.moving and self.maxNormal==False ):
             self.parent().move( event.globalPos() - self.offset )
-        return super(TitleBar, self).mouseMoveEvent(event)
+        return super().mouseMoveEvent(event)
 
 
 
     def mouseReleaseEvent( self, event ):
         self.moving = False
-        return super(TitleBar, self).mouseReleaseEvent(event)
+        return super().mouseReleaseEvent(event)
 
 
 
@@ -283,7 +283,7 @@ class Frame( QFrame ):
 
 
     def __init__(self, parent=None):
-        super(Frame, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         
         self.setFrameShape( QFrame.StyledPanel )
         self.setStyleSheet( g_MainWindowStyleSheet )
@@ -304,7 +304,7 @@ class Frame( QFrame ):
         #self.contentlayout.setContentsMargins( 0, 0, 0, 0 )
         
         #self.framelayout.addLayout( self.contentlayout )
-        super(Frame, self).setLayout( self.framelayout )#self.setLayout(framelayout)
+        super().setLayout( self.framelayout )#self.setLayout(framelayout)
        
         self.__m_Margin = 5
 
@@ -361,7 +361,7 @@ class Frame( QFrame ):
             self.__m_mousePressPos = event.globalPos()
             self.__m_mousePressRect = self.geometry()
 
-        return super(Frame, self).mousePressEvent(event)
+        return super().mousePressEvent(event)
 
 
 
@@ -369,7 +369,7 @@ class Frame( QFrame ):
         if( self.handleSelected ):
             self.__InteractiveResize( event.globalPos() )
             return
-        return super(Frame, self).mouseMoveEvent(event)
+        return super().mouseMoveEvent(event)
 
 
 
@@ -377,27 +377,27 @@ class Frame( QFrame ):
         self.handleSelected = None
         #self.__m_mousePressPos = None
         #self.__m_mousePressRect = None
-        return super(Frame, self).mouseReleaseEvent(event)
+        return super().mouseReleaseEvent(event)
 
 
 
     def resizeEvent( self, QResizeEvent ):
         self.__UpdateHandlesPos()
-        return super(Frame, self).resizeEvent(QResizeEvent)
+        return super().resizeEvent(QResizeEvent)
         
 
 
     def showMaximized( self ):
         for handle in self.handles.values():
             handle.hide()
-        return super(Frame, self).showMaximized()
+        return super().showMaximized()
 
 
 
     def showNormal( self ):
         for handle in self.handles.values():
             handle.show()
-        return super(Frame, self).showNormal()
+        return super().showNormal()
 
 
 

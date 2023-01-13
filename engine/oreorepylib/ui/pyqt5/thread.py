@@ -9,7 +9,7 @@ class Worker( QThread ):
     __Signal = pyqtSignal()
 
     def __init__( self, parent=None ):
-        super(Worker, self).__init__( parent=parent )
+        super().__init__( parent=parent )
 
         self.__m_Running = False
         self.__m_Interval = 15000# polling interval in microseconds
@@ -65,7 +65,7 @@ class GenericWorker( QThread ):
 
 
     def __init__(self, parent=None):
-        super(GenericWorker, self).__init__( parent=parent )
+        super().__init__( parent=parent )
 
         self.__m_Running = False
         self.__m_Interval = 15000# polling interval in microseconds
@@ -125,7 +125,7 @@ class GenericWorker( QThread ):
 class Batch( QThread ):
 
     def __init__(self, parent=None):
-        super(Batch, self).__init__(parent=parent)
+        super().__init__(parent=parent)
 
         self.iters = []
         self.sig_exec = []

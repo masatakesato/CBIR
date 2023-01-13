@@ -11,7 +11,7 @@ from clientwidget import *
 class SearcherClient( tcp.Client ):
 
     def __init__( self, host, port ):
-        super(SearcherClient, self).__init__( host, port, 60, 5 )
+        super().__init__( host, port, 60, 5 )
         #self.client = tcp.Client( host, port, 60, 5 )
     
     #def IsReady( self ):

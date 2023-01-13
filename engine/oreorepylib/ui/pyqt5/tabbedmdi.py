@@ -33,7 +33,7 @@ class Floater( Frame ):
 
 
     def __init__( self, *args, **kwargs ):
-        super(Floater, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.setLayout( QVBoxLayout() )
         self.__m_Attribs = {}
@@ -71,7 +71,7 @@ class Floater( Frame ):
 
 
     def mousePressEvent( self, event ):
-        super(Floater, self).mousePressEvent(event)
+        super().mousePressEvent(event)
         #print( "Floater::mousePressEvent()..." )
         if( self.handleSelected is None ):
             self.SelectSignal.emit( self.__m_ID )
@@ -84,7 +84,7 @@ class Floater( Frame ):
         if( self.handleSelected is None ):
             self.MoveSignal.emit( self.__m_ID, event.globalPos() )
 
-        return super(Floater, self).mouseMoveEvent(event)
+        return super().mouseMoveEvent(event)
 
 
 
@@ -94,13 +94,13 @@ class Floater( Frame ):
         if( self.handleSelected is None ):
             self.ReleaseSignal.emit( event.globalPos() )
 
-        return super(Floater, self).mouseReleaseEvent(event)
+        return super().mouseReleaseEvent(event)
         
 
 
     def closeEvent( self, event ):
         #print( "Floater::closeEvent()..." )
-        super(Floater, self).closeEvent(event)
+        super().closeEvent(event)
         self.CloseSignal.emit( self.__m_ID )
 
 
@@ -152,7 +152,7 @@ class TabBar( QTabBar ):
 
 
     def __init__( self, *args, **kwargs ):
-        super(TabBar, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.setTabsClosable( True )
         self.setMovable(False)# Disable default tab drag feature.
@@ -267,14 +267,14 @@ class TabBar( QTabBar ):
         #print( "TabBar::tabInserted(%d)" % index )
         self.setCurrentIndex(index)
         self.setTabData( index, TabBar.__CLOSABLE_MASK__ | TabBar.__DETACHABLE_MASK__ )
-        #return super(TabWidget, self).tabInserted(index)
+        #return super().tabInserted(index)
         
 
 
     def tabRemoved( self, index ):
         #print( "TabBar::tabRemoved(%d)" % index )
         self.setCurrentIndex( max(min(index, self.count()-2), 0) )# clamp current index range to [ 0, NumActiveTabs()-1 ]
-        #return super(TabWidget, self).tabRemoved(index)
+        #return super().tabRemoved(index)
 
 
 
@@ -299,7 +299,7 @@ class TabBar( QTabBar ):
             else:
                 event.ignore()
 
-        return super(TabBar, self).mousePressEvent(event)
+        return super().mousePressEvent(event)
 
 
 
@@ -342,7 +342,7 @@ class TabBar( QTabBar ):
         #else:# TabBar.__DRAG_NONE__
         #    pass
 
-        return super(TabBar, self).mouseMoveEvent(event)
+        return super().mouseMoveEvent(event)
         
 
 
@@ -359,7 +359,7 @@ class TabBar( QTabBar ):
         self.__m_CurrIndex = -1
         self.__m_DragMode = TabBar.__DRAG_NONE__
 
-        return super(TabBar, self).mouseReleaseEvent(event)
+        return super().mouseReleaseEvent(event)
 
 
 
@@ -383,7 +383,7 @@ class TabBar( QTabBar ):
         #        self.style().drawControl( QStyle.CE_TabBarTabLabel, self.__m_Option, painter, self )
 
 
-        super(TabBar, self).paintEvent(event)
+        super().paintEvent(event)
 
         if( self.__m_FocusIndex != -1 ):
             painter = QPainter( self )
@@ -423,7 +423,7 @@ class TabWidget( QTabWidget ):
 
     
     def __init__( self, *args, **kwargs ):
-        super(TabWidget, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         
         # Setup custom QTabBar
         self.__m_TabBar = TabBar(self)
@@ -574,14 +574,14 @@ class TabWidget( QTabWidget ):
         #print( "TabWidget::changeEvent()..." )
         if( event.type()==QEvent.ActivationChange and self.isActiveWindow() ):
             self.RaiseSignal.emit( self.__m_ID )
-        return super(TabWidget, self).changeEvent(event)
+        return super().changeEvent(event)
 
 
 
     def closeEvent( self, event ):
         #print( "TabWidget::closeEvent()..." )
         self.__m_Status = TabWidget.__TRASHED__
-        super(TabWidget, self).closeEvent(event)
+        super().closeEvent(event)
         self.CleanupSignal.emit( True )
 
 
@@ -596,7 +596,7 @@ class TabWidget( QTabWidget ):
         while( topmostWidget.parentWidget() ):
             topmostWidget = topmostWidget.parentWidget()
 
-        return super(TabWidget, self).raise_() if topmostWidget is self else topmostWidget.raise_()
+        return super().raise_() if topmostWidget is self else topmostWidget.raise_()
 
 
 
@@ -622,7 +622,7 @@ class DockableFrame( Frame ):
 
 
     def __init__( self, *args, **kwargs ):
-        super(DockableFrame, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.__m_Title = "        "
         self.__m_DynamicTitle = True
@@ -819,7 +819,7 @@ class DockableFrame( Frame ):
 
 
     def mousePressEvent( self, event ):
-        super(DockableFrame, self).mousePressEvent(event)
+        super().mousePressEvent(event)
         #print( "DockableFrame::mousePressEvent()...%s" % self.windowTitle() )
         if( self.handleSelected is None and self.IsVolatile() ):
             self.__m_TabWidget.SetLock(True) 
@@ -830,7 +830,7 @@ class DockableFrame( Frame ):
         #print( "DockableFrame::mouseMoveEvent()...%s" % self.windowTitle() )
         if( self.handleSelected is None and self.IsVolatile() ):# Avoid docking check while resizing widget.
             self.MoveSignal.emit( self.__m_ID, event.globalPos() )
-        return super(DockableFrame, self).mouseMoveEvent(event)
+        return super().mouseMoveEvent(event)
 
 
 
@@ -839,7 +839,7 @@ class DockableFrame( Frame ):
         if( self.handleSelected is None and self.IsVolatile() ):# Avoid docking check while resizing widget.
             self.ReleaseSignal.emit( self.__m_ID, event.globalPos() )
             self.__m_TabWidget.SetLock(False)
-        return super(DockableFrame, self).mouseReleaseEvent(event)
+        return super().mouseReleaseEvent(event)
 
 
 
@@ -847,14 +847,14 @@ class DockableFrame( Frame ):
         #print( "DockableFrame::changeEvent()..." )
         if( event.type()==QEvent.ActivationChange and self.isActiveWindow() ):
             self.RaiseSignal.emit( self.__m_ID )
-        return super(DockableFrame, self).changeEvent(event)
+        return super().changeEvent(event)
 
 
 
     def closeEvent( self, event ):
         #print( "DockableFrame::closeEvent()..." )
         self.__m_TabWidget.SetTrash( True )
-        super(DockableFrame, self).closeEvent(event)
+        super().closeEvent(event)
         self.CleanupSignal.emit( True )
 
 
@@ -869,7 +869,7 @@ class DockableFrame( Frame ):
         while( topmostWidget.parentWidget() ):
             topmostWidget = topmostWidget.parentWidget()
 
-        return super(DockableFrame, self).raise_() if topmostWidget is self else topmostWidget.raise_()
+        return super().raise_() if topmostWidget is self else topmostWidget.raise_()
 
 
 

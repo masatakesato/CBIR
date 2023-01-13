@@ -49,7 +49,7 @@ class ImageFrame( QFrame ):
 
 
     def __init__( self, parent=None ):
-        super(ImageFrame, self).__init__(parent)
+        super().__init__(parent)
 
         self.setAcceptDrops(True)
         self.setFocusPolicy( Qt.ClickFocus )
@@ -98,7 +98,7 @@ class ImageFrame( QFrame ):
     def resizeEvent( self, event ):
         if( self.__m_PixMap ):
             self.__m_Label.setPixmap( self.__m_PixMap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation) ) 
-        return super(ImageFrame, self).resizeEvent(event)
+        return super().resizeEvent(event)
 
 
     def GetImageData( self ):
@@ -197,7 +197,7 @@ class ThumbnailFrame(QFrame):
     def __init__( self, parent=None ):
         self.anim = None
 
-        super(ThumbnailFrame, self).__init__(parent)
+        super().__init__(parent)
         
         #self.setMinimumSize(256, 256)
         self.setStyleSheet( self.stylesheet )
@@ -223,26 +223,26 @@ class ThumbnailFrame(QFrame):
 
     def paintEvent(self, event):
         #print( "paint event...%s" % self.objectName() )
-        return super(ThumbnailFrame, self).paintEvent(event)
+        return super().paintEvent(event)
 
     def resizeEvent( self, event ):
         if( self.anim ):
             self.anim.setScaledSize( self.geometry().size() )
         #if( self.__m_PixMap ):
         #    self.__m_Label.setPixmap( self.__m_PixMap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation) ) 
-        return super(ThumbnailFrame, self).resizeEvent(event)
+        return super().resizeEvent(event)
 
 
     def enterEvent( self, event ):
         #print("mouse entered")
         if( self.anim.isValid() ): self.anim.setPaused(False)
-        return super(ThumbnailFrame, self).enterEvent(event)
+        return super().enterEvent(event)
 
 
     def leaveEvent( self, event ):
         #print("mouse leaved")
         if( self.anim.isValid() ): self.anim.setPaused(True)
-        return super(ThumbnailFrame, self).leaveEvent(event)
+        return super().leaveEvent(event)
 
 
 
@@ -372,7 +372,7 @@ class ThumbnailFrame(QFrame):
 class LoadingOverlay( QWidget ):
 
     def __init__(self, parent=None):
-        super(LoadingOverlay, self).__init__(parent)
+        super().__init__(parent)
 
         self.setLayout( QVBoxLayout() )
         self.layout().setContentsMargins(0, 0, 0, 0)
@@ -391,24 +391,24 @@ class LoadingOverlay( QWidget ):
 
     def show(self):
         self.label.movie().setPaused(False)
-        return super(LoadingOverlay, self).show()
+        return super().show()
 
 
     def hide(self):
         self.label.movie().setPaused(True)
-        return super(LoadingOverlay, self).hide()
+        return super().hide()
 
 
     def paintEvent(self, event):
         
-        return super(LoadingOverlay, self).paintEvent(event)
+        return super().paintEvent(event)
 
 
 
 class ResultFrame( QFrame ):
 
     def __init__(self, parent=None):
-        super(ResultFrame, self).__init__(parent=parent)
+        super().__init__(parent=parent)
 
         self.setStyleSheet( stylesheet.g_DarkDynamicFrameStyleSheet )
         self.setFocusPolicy( Qt.StrongFocus )
@@ -425,7 +425,7 @@ class ResultFrame( QFrame ):
         rect = self.visibleRegion().boundingRect() if self.isVisible() else QRect( QPoint(),event.size() )
         for w in self.nonlayoutwidgets:
             w.setGeometry( rect )
-        super(ResultFrame, self).wheelEvent(event)
+        super().wheelEvent(event)
 
 
     def resizeEvent(self, event):
@@ -441,7 +441,7 @@ class ResultFrame( QFrame ):
 #class MyLineEdit(QLineEdit):
 
 #    def __init__( self, str="", parent=None ):
-#        super(MyLineEdit, self).__init__(str, parent)
+#        super().__init__(str, parent)
 
 #        self.setDragEnabled(True)
 #        self.setAcceptDrops(True)
@@ -474,7 +474,7 @@ class ClientWidget( MainWindow ):#QFrame):#
 
 
     def __init__( self, searcher ):
-        super(ClientWidget, self).__init__()
+        super().__init__()
 
         self.setWindowTitle( "OreOre Visual Search" )
         self.setAcceptDrops(True)
